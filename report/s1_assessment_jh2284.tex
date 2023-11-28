@@ -12,9 +12,9 @@
 \newpage
 
 
-\section{Section A}
+\section*{Section A}
 
-\subsection{Part (a)}
+\subsection*{Part (a)}
 
 We begin by showing that both densities $s$ and $b$ are properly normalised in the range $M\in [-\infty, +\infty]$. In the former case, as a first step we use a change of variables $Z = \mu + \sigma M$ such that $\frac{dM}{dZ} = \sigma$, for which the integral limits don't change:
 
@@ -57,7 +57,7 @@ Finally this lets us show that the probability density $p$ given is properly nor
     & = 1. \\
 \end{align*}
 
-\subsection{Part (b)}
+\subsection*{Part (b)}
 
 In order to ensure that the fraction of signal in the restricted distribution for $M$ remains $f$, we must normalise the signal and background separately over $[\alpha,\beta]$, we introduce these new restricted distributions as
 
@@ -69,8 +69,8 @@ We then compute the relevant integrals:
 
 \begin{align*}
     \int_\alpha^\beta s(M;\mu,\sigma)dM & = \int_{-\infty}^\beta s(M;\mu,\sigma)dM - \int_{-\infty}^\alpha s(M;\mu,\sigma)dM \\
-    & = \frac{1}{2}\left[1 + \erf\left(\frac{\beta - \mu}{\sigma}\right)\right] - \frac{1}{2}\left[1 + \erf\left(\frac{\alpha - \mu}{\sigma}\right)\right] \\
-    & = \frac{1}{2}\erf\left(\frac{\beta - \mu}{\sigma}\right) - \frac{1}{2}\erf\left(\frac{\alpha - \mu}{\sigma}\right)
+    & = \frac{1}{2}\left[1 + \erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right)\right] - \frac{1}{2}\left[1 + \erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)\right] \\
+    & = \frac{1}{2}\erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right) - \frac{1}{2}\erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)
 \end{align*}
 \begin{align*}
     \int_\alpha^\beta b(M;\lambda)dM & = \int_{-\infty}^\beta b(M;\lambda)dM + \int_{-\infty}^\alpha b(M;\lambda)dM \\
@@ -80,10 +80,16 @@ We then compute the relevant integrals:
 
 The properly normalised probability density function for $M\in[\alpha,\beta]$ is then
 \[
-    p_r(M;\boldsymbol{\theta}) = \frac{2f}{\erf\left(\frac{\beta - \mu}{\sigma}\right) - \erf\left(\frac{\alpha - \mu}{\sigma}\right)}s(M;\mu,\sigma) + \frac{1-f}{e^{-\lambda\alpha} - e^{-\lambda\beta}}b(M;\lambda)
+    p_r(M;\boldsymbol{\theta}) = \frac{2f}{\erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right) - \erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)}s(M;\mu,\sigma) + \frac{1-f}{e^{-\lambda\alpha} - e^{-\lambda\beta}}b(M;\lambda)
 \]
 where $s(M;\mu,\sigma)$ and $b(M;\lambda)$ are as given on the sheet. Note that the value for $p_r(M)$ is zero when $M\notin[\alpha,\beta]$.
-\section{Section B}
+
+\subsection*{Part (c)}
+
+
+
+
+\section*{Section B}
 
 
 \end{document}
