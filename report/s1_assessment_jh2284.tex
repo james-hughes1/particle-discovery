@@ -4,6 +4,7 @@
 \author{James Hughes}
 
 \usepackage{amsmath}
+\DeclareMathOperator{\erf}{erf}
 
 \begin{document}
 
@@ -23,21 +24,21 @@ We begin by showing that both densities $s$ and $b$ are properly normalised in t
         & = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty\exp(-\frac{1}{2}Z^2)dZ\\
 \end{align*}
 
-In order to prove that $s$ is properly normalised, we simply need to show that the last expression above evaluates to $1$. We do this by computing it's square, which in turn leads to an integral in two dummy variables. Below we then use the transformation to polar coordinates $(X,Y) = \rho(R,\theta) = (R\cos(\theta), R\sin(\theta))$ which has Jacobian matrix
+In order to prove that $s$ is properly normalised, we simply need to show that the last expression above evaluates to $1$. We do this by computing it's square, which in turn leads to an integral in two dummy variables. Below we then use the transformation to polar coordinates $(X,Y) = \rho(R,\phi) = (R\cos(\phi), R\sin(\phi))$ which has Jacobian matrix
 
 \[
     \begin{pmatrix}
-        \cos(\theta) & -R\sin(\theta) \\
-        \sin(\theta) & R\cos(\theta) \\
+        \cos(\phi) & -R\sin(\phi) \\
+        \sin(\phi) & R\cos(\phi) \\
     \end{pmatrix}
 \]
 
-and hence $|J_\rho(R,\theta)| = R$. Then
+and hence $|J_\rho(R,\phi)| = R$. Then, denoting the integral in the final expression above by $I$, we find:
 
 \begin{align*}
-    \left[\frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty\exp(-\frac{1}{2}Z^2)dZ\right]^2 & = \frac{1}{2\pi}\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}X^2)dX\right]\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}Y^2)dY\right] \\
+    \left[\frac{1}{\sqrt{2\pi}}I\right]^2 & = \frac{1}{2\pi}\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}X^2)dX\right]\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}Y^2)dY\right] \\
         & = \frac{1}{2\pi}\int_{-\infty}^\infty\int_{-\infty}^\infty\exp(-\frac{1}{2}(X^2 + Y^2))dXdY\\
-        & = \frac{1}{2\pi}\int_{0}^{2\pi}\int_{0}^\infty\exp(-\frac{1}{2}(R^2))\cdot R dRd\theta\\
+        & = \frac{1}{2\pi}\int_{0}^{2\pi}\int_{0}^\infty\exp(-\frac{1}{2}(R^2))\cdot R dRd\phi\\
         & = \left[-\exp(-\frac{1}{2}R^2)\right]_{R=0}^{R=\infty} \\
         & = 1. \\
 \end{align*}
@@ -58,6 +59,30 @@ Finally this lets us show that the probability density $p$ given is properly nor
 
 \subsection{Part (b)}
 
+In order to ensure that the fraction of signal in the restricted distribution for $M$ remains $f$, we must normalise the signal and background separately over $[\alpha,\beta]$, we introduce these new restricted distributions as
+
+\begin{align*}
+    s_r(M;\mu,\sigma) = \frac{s(M;\mu,\sigma)}{\int_\alpha^\beta s(M;\mu,\sigma)dM} && b_r(M;\lambda) = \frac{b(M;\lambda)}{\int_\alpha^\beta b(M;\lambda)dM}
+\end{align*}
+
+We then compute the relevant integrals:
+
+\begin{align*}
+    \int_\alpha^\beta s(M;\mu,\sigma)dM & = \int_{-\infty}^\beta s(M;\mu,\sigma)dM - \int_{-\infty}^\alpha s(M;\mu,\sigma)dM \\
+    & = \frac{1}{2}\left[1 + \erf\left(\frac{\beta - \mu}{\sigma}\right)\right] - \frac{1}{2}\left[1 + \erf\left(\frac{\alpha - \mu}{\sigma}\right)\right] \\
+    & = \frac{1}{2}\erf\left(\frac{\beta - \mu}{\sigma}\right) - \frac{1}{2}\erf\left(\frac{\alpha - \mu}{\sigma}\right)
+\end{align*}
+\begin{align*}
+    \int_\alpha^\beta b(M;\lambda)dM & = \int_{-\infty}^\beta b(M;\lambda)dM + \int_{-\infty}^\alpha b(M;\lambda)dM \\
+    & = 1 - e^{-\lambda\beta} - (1 - e^{-\lambda\beta}) \\
+    & = e^{-\lambda\alpha} - e^{-\lambda\beta}
+\end{align*}
+
+The properly normalised probability density function for $M\in[\alpha,\beta]$ is then
+\[
+    p_r(M;\boldsymbol{\theta}) = \frac{2f}{\erf\left(\frac{\beta - \mu}{\sigma}\right) - \erf\left(\frac{\alpha - \mu}{\sigma}\right)}s(M;\mu,\sigma) + \frac{1-f}{e^{-\lambda\alpha} - e^{-\lambda\beta}}b(M;\lambda)
+\]
+where $s(M;\mu,\sigma)$ and $b(M;\lambda)$ are as given on the sheet. Note that the value for $p_r(M)$ is zero when $M\notin[\alpha,\beta]$.
 \section{Section B}
 
 
