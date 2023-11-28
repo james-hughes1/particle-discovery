@@ -28,3 +28,17 @@ def plot_signal_background_mixed(f, la, mu, sg, alpha, beta, filename, npoints=1
     ax.plot(x_plot, pdf_b)
     ax.plot(x_plot, pdf_sb)
     plt.savefig("plots/"+filename)
+
+
+def rej_sample(pdf, sample_size, lower, upper, max_jobs):
+    x_vals = np.linspace(lower, upper, 100001)
+    y_max = np.max(pdf(x_vals))
+    sample = []
+    jobs = 0
+    while len(sample) < sample_size and jobs < max_jobs:
+        x = np.random.uniform(lower, upper)
+        y = np.random.uniform(0, y_max)
+        if y < pdf(x):
+            sample.append(x)
+        jobs += 1
+    return sample, jobs
