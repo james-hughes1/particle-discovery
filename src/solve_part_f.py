@@ -22,5 +22,5 @@ def T_simulation(N, N_toys):
 
 lp = LineProfiler()
 lp_wrapper = lp(T_simulation)
-lp_wrapper(10000, 10)
+lp_wrapper(10000, 100)
 lp.print_stats()

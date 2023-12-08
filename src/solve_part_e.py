@@ -3,15 +3,12 @@ from iminuit import Minuit
 from iminuit.cost import BinnedNLL
 
 from mixed_pdf_tools import (
-    pdf_h1_fast,
-    rej_sample,
+    rej_sample_h1_fast,
     cdf_h1_fast,
     plot_signal_background_mixed,
 )
 
-sample_array, _ = rej_sample(
-    pdf_h1_fast, 100000, 5.0, 5.6, 100000000, y_max=3.73
-)
+sample_array = rej_sample_h1_fast(10000, 1000000)
 nh, xe = np.histogram(sample_array, bins=100, range=(5, 5.6))
 
 # Perform binned ML fit of parameters.
