@@ -156,22 +156,21 @@ def compute_llr(sample_array):
     nh, xe = np.histogram(sample_array, bins=int(N / 1000), range=(5, 5.6))
 
     # Perform binned ML fit of parameters using signal+background model.
-    nll = BinnedNLL(nh, xe, cdf_norm_expon_mixed)
-    mi = Minuit(nll, f=0.1, la=0.5, mu=5.3, sg=0.1, alpha=5.0, beta=5.6)
-    mi.fixed["alpha"] = True
-    mi.fixed["beta"] = True
+    nll_sb = BinnedNLL(nh, xe, cdf_h1_fast)
+    mi = Minuit(nll_sb, f=0.1, la=0.5, mu=5.3, sg=0.1)
     mi.limits["f"] = (0, 1)
     mi.limits["la"] = (1e-9, 1e2)
     mi.limits["mu"] = (5.0, 5.6)
     mi.limits["sg"] = (1e-9, 10)
     mi.migrad()
-    nll_sb = mi.fval
+    nll_sb_value = mi.fval
 
     # Perform binned ML fit using background only model.
-    mi.values["f"] = 0
-    mi.fixed["f"] = True
+    nll_b = BinnedNLL(nh, xe, cdf_h0_fast)
+    mi = Minuit(nll_b, la=0.5)
+    mi.limits["la"] = (1e-9, 1e2)
     mi.migrad()
-    nll_b = mi.fval
+    nll_b_value = mi.fval
 
     # Return the log-likelihood ratio.
-    return nll_b - nll_sb
+    return nll_b_value - nll_sb_value
