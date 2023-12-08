@@ -192,12 +192,13 @@ def compute_llr(sample_array):
     return nll_b_value - nll_sb_value
 
 
-REJ_SAMPLE_BINS = np.linspace(5.0, 5.6, 4)
+N_REJ_SAMPLE_BINS = 10
+REJ_SAMPLE_BINS = np.linspace(5.0, 5.6, N_REJ_SAMPLE_BINS + 1)
 REJ_SAMPLE_WEIGHTS_H1 = cdf_h1_fast(REJ_SAMPLE_BINS[1:]) - cdf_h1_fast(
     REJ_SAMPLE_BINS[:-1]
 )
-REJ_SAMPLE_YMAX_H1 = np.zeros(3)
-for bin_idx in range(3):
+REJ_SAMPLE_YMAX_H1 = np.zeros(N_REJ_SAMPLE_BINS)
+for bin_idx in range(N_REJ_SAMPLE_BINS):
     x = np.linspace(
         REJ_SAMPLE_BINS[bin_idx], REJ_SAMPLE_BINS[bin_idx + 1], 1000001
     )
@@ -208,7 +209,6 @@ def rej_sample_h1_fast(sample_size, max_jobs):
     subsample_sizes = [
         int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H1
     ]
-    print(subsample_sizes)
     sample = []
     for subsample_idx, size in enumerate(subsample_sizes):
         subsample = []
@@ -227,5 +227,40 @@ def rej_sample_h1_fast(sample_size, max_jobs):
                 subsample.append(x)
             jobs += 1
         sample = sample + subsample
-    print(len(sample))
+    return sample
+
+
+REJ_SAMPLE_WEIGHTS_H0 = cdf_h0_fast(REJ_SAMPLE_BINS[1:]) - cdf_h0_fast(
+    REJ_SAMPLE_BINS[:-1]
+)
+REJ_SAMPLE_YMAX_H0 = np.zeros(N_REJ_SAMPLE_BINS)
+for bin_idx in range(N_REJ_SAMPLE_BINS):
+    x = np.linspace(
+        REJ_SAMPLE_BINS[bin_idx], REJ_SAMPLE_BINS[bin_idx + 1], 1000001
+    )
+    REJ_SAMPLE_YMAX_H0[bin_idx] = np.max(pdf_h0_fast(x))
+
+
+def rej_sample_h0_fast(sample_size, max_jobs):
+    subsample_sizes = [
+        int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H0
+    ]
+    sample = []
+    for subsample_idx, size in enumerate(subsample_sizes):
+        subsample = []
+        jobs = 0
+        lower, upper = (
+            REJ_SAMPLE_BINS[subsample_idx],
+            REJ_SAMPLE_BINS[subsample_idx + 1],
+        )
+        y_max = REJ_SAMPLE_YMAX_H0[subsample_idx]
+        while (
+            len(subsample) < subsample_sizes[subsample_idx] and jobs < max_jobs
+        ):
+            x = np.random.uniform(lower, upper)
+            y = np.random.uniform(0, y_max)
+            if y < pdf_h0_fast(x):
+                subsample.append(x)
+            jobs += 1
+        sample = sample + subsample
     return sample
