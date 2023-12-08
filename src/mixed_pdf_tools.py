@@ -15,6 +15,13 @@ def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
         - erf((alpha - mu) / (sg * np.sqrt(2)))
     )
     weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
+    print(pdf_b)
+    print(
+        "Here:",
+        expon.pdf(x, loc=0, scale=1 / la),
+        la,
+        expon.pdf(x, loc=0.0, scale=5.0),
+    )
     return (weight_s * pdf_s) + (weight_b * pdf_b)
 
 
@@ -52,7 +59,7 @@ def plot_signal_background_mixed(
         scale_factor = 1
     pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
     pdf_b = expon.pdf(x_plot, loc=0, scale=1 / la)
-    pdf_sb = pdf_norm_expon_mixed(x_plot, f, la, mu, sg, alpha, beta)
+    pdf_sb = pdf_h1_fast(x_plot, f, la, mu, sg)
     ax.plot(x_plot, f * scale_factor * pdf_s)
     ax.plot(x_plot, (1 - f) * scale_factor * pdf_b)
     ax.plot(x_plot, scale_factor * pdf_sb)
@@ -82,7 +89,8 @@ def pdf_h0_fast(x, la=None):
         return WEIGHT_B_H0 * expon.pdf(x, loc=0, scale=2.0)
     else:
         weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        return weight_b * expon.pdf(x, loc=0, scale=2.0)
+        pdf_b = expon.pdf(x, loc=0, scale=1 / la)
+        return weight_b * pdf_b
 
 
 def cdf_h0_fast(x, la=None):
@@ -90,7 +98,8 @@ def cdf_h0_fast(x, la=None):
         return WEIGHT_B_H0 * expon.cdf(x, loc=0, scale=2.0)
     else:
         weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        return weight_b * expon.pdf(x, loc=0, scale=2.0)
+        cdf_b = expon.cdf(x, loc=0, scale=1 / la)
+        return weight_b * cdf_b
 
 
 WEIGHT_S_H1 = 0.2 / (
@@ -109,10 +118,10 @@ def pdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
             erf((5.6 - mu) / (sg * np.sqrt(2)))
             - erf((5.0 - mu) / (sg * np.sqrt(2)))
         )
-        weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        return (weight_s * norm.cdf(x, loc=5.28, scale=0.018)) + (
-            weight_b * expon.cdf(x, loc=0, scale=2.0)
-        )
+        weight_b = (1 - f) / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
+        pdf_s = norm.pdf(x, loc=mu, scale=sg)
+        pdf_b = expon.pdf(x, loc=0, scale=1 / la)
+        return (weight_s * pdf_s) + (weight_b * pdf_b)
 
 
 def cdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
@@ -125,10 +134,10 @@ def cdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
             erf((5.6 - mu) / (sg * np.sqrt(2)))
             - erf((5.0 - mu) / (sg * np.sqrt(2)))
         )
-        weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        return (weight_s * norm.cdf(x, loc=5.28, scale=0.018)) + (
-            weight_b * expon.cdf(x, loc=0, scale=2.0)
-        )
+        weight_b = (1 - f) / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
+        cdf_s = norm.cdf(x, loc=mu, scale=sg)
+        cdf_b = expon.cdf(x, loc=0, scale=1 / la)
+        return (weight_s * cdf_s) + (weight_b * cdf_b)
 
 
 def compute_llr(sample_array):
