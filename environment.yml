@@ -11,7 +11,7 @@ dependencies:
   - bottleneck=1.3.5
   - brotli=1.0.9
   - brotli-bin=1.0.9
-  - ca-certificates=2023.11.17
+  - ca-certificates=2023.08.22
   - contourpy=1.2.0
   - cycler=0.11.0
   - cyrus-sasl=2.1.28
@@ -123,6 +123,7 @@ dependencies:
   - tk=8.6.12
   - tomli=2.0.1
   - tornado=6.3.3
+  - tqdm=4.65.0
   - traitlets=5.7.1
   - typing_extensions=4.7.1
   - tzdata=2023c
