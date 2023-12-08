@@ -70,8 +70,13 @@ def plot_signal_background_mixed(
     pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
     pdf_b = expon.pdf(x_plot, loc=0, scale=1 / la)
     pdf_sb = pdf_h1_fast(x_plot, f, la, mu, sg)
-    ax.plot(x_plot, f * scale_factor * pdf_s)
-    ax.plot(x_plot, (1 - f) * scale_factor * pdf_b)
+    weight_s = (2 * f) / (
+        erf((beta - mu) / (sg * np.sqrt(2)))
+        - erf((alpha - mu) / (sg * np.sqrt(2)))
+    )
+    weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
+    ax.plot(x_plot, weight_s * scale_factor * pdf_s)
+    ax.plot(x_plot, weight_b * scale_factor * pdf_b)
     ax.plot(x_plot, scale_factor * pdf_sb)
     plt.savefig("outputs/" + filename)
 
