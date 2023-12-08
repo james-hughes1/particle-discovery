@@ -108,18 +108,12 @@ def pdf_h0_fast(x, la=None):
         return weight_b * pdf_b
 
 
-def cdf_h0_fast(x, la=None):
-    if la is None:
-        cdf_b = expon.cdf(x, loc=0, scale=2.0) - expon.cdf(
-            5.0, loc=0, scale=2.0
-        )
-        return WEIGHT_B_H0 * cdf_b
-    else:
-        weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
-            5.0, loc=0, scale=1 / la
-        )
-        return weight_b * cdf_b
+def cdf_h0_fast(x, la):
+    weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
+    cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
+        5.0, loc=0, scale=1 / la
+    )
+    return weight_b * cdf_b
 
 
 WEIGHT_S_H1 = 0.2 / (
@@ -144,26 +138,17 @@ def pdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
         return (weight_s * pdf_s) + (weight_b * pdf_b)
 
 
-def cdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
-    if la is None:
-        cdf_s = norm.cdf(x, loc=5.28, scale=0.018) - norm.cdf(
-            5.0, loc=5.28, scale=0.018
-        )
-        cdf_b = expon.cdf(x, loc=0, scale=2.0) - expon.cdf(
-            5.0, loc=0, scale=2.0
-        )
-        return (WEIGHT_S_H1 * cdf_s) + (WEIGHT_B_H1 * cdf_b)
-    else:
-        weight_s = (2 * f) / (
-            erf((5.6 - mu) / (sg * np.sqrt(2)))
-            - erf((5.0 - mu) / (sg * np.sqrt(2)))
-        )
-        weight_b = (1 - f) / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        cdf_s = norm.cdf(x, loc=mu, scale=sg) - norm.cdf(5.0, loc=mu, scale=sg)
-        cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
-            5.0, loc=0, scale=1 / la
-        )
-        return (weight_s * cdf_s) + (weight_b * cdf_b)
+def cdf_h1_fast(x, f, la, mu, sg):
+    weight_s = (2 * f) / (
+        erf((5.6 - mu) / (sg * np.sqrt(2)))
+        - erf((5.0 - mu) / (sg * np.sqrt(2)))
+    )
+    weight_b = (1 - f) / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
+    cdf_s = norm.cdf(x, loc=mu, scale=sg) - norm.cdf(5.0, loc=mu, scale=sg)
+    cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
+        5.0, loc=0, scale=1 / la
+    )
+    return (weight_s * cdf_s) + (weight_b * cdf_b)
 
 
 def compute_llr(sample_array):
@@ -173,7 +158,7 @@ def compute_llr(sample_array):
 
     # Perform binned ML fit of parameters using signal+background model.
     nll_sb = BinnedNLL(nh, xe, cdf_h1_fast)
-    mi = Minuit(nll_sb, f=0.1, la=0.5, mu=5.3, sg=0.1)
+    mi = Minuit(nll_sb, f=0.5, la=1.0, mu=5.3, sg=0.01)
     mi.limits["f"] = (0, 1)
     mi.limits["la"] = (1e-9, 1e2)
     mi.limits["mu"] = (5.0, 5.6)
@@ -183,7 +168,7 @@ def compute_llr(sample_array):
 
     # Perform binned ML fit using background only model.
     nll_b = BinnedNLL(nh, xe, cdf_h0_fast)
-    mi = Minuit(nll_b, la=0.5)
+    mi = Minuit(nll_b, la=1.0)
     mi.limits["la"] = (1e-9, 1e2)
     mi.migrad()
     nll_b_value = mi.fval
@@ -219,14 +204,14 @@ CDF_MIXED_INV_APPROX_H0 = 5.0 + 0.6 * cdf_mixed_inv_h0_01
 
 
 def sample_h1_fast(sample_size):
-    g = np.random.default_rng(seed=1)
+    g = np.random.default_rng()
     uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
     sample = CDF_MIXED_INV_APPROX_H1[uniform_sample]
     return sample
 
 
 def sample_h0_fast(sample_size):
-    g = np.random.default_rng(seed=2)
+    g = np.random.default_rng()
     uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
     sample = CDF_MIXED_INV_APPROX_H0[uniform_sample]
     return sample

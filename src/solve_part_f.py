@@ -16,11 +16,14 @@ def T_simulation(N, N_toys):
         T_b_sample[toy_idx] = compute_llr(sample_array_b)
 
     fig, ax = plt.subplots(figsize=(10, 8))
-    ax.hist(np.concatenate([T_sb_sample, T_b_sample]))
-    plt.savefig("outputs/T_simulation.png")
+    ax.hist(T_sb_sample)
+    plt.savefig("outputs/T_H1_simulation.png")
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.hist(T_b_sample)
+    plt.savefig("outputs/T_H0_simulation.png")
 
 
 lp = LineProfiler()
 lp_wrapper = lp(T_simulation)
-lp_wrapper(10000, 100)
+lp_wrapper(100000, 100)
 lp.print_stats()

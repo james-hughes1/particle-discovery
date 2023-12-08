@@ -8,7 +8,7 @@ from mixed_pdf_tools import (
     plot_signal_background_mixed,
 )
 
-sample_array = sample_h1_fast(10000)
+sample_array = sample_h1_fast(10000, 47)
 nh, xe = np.histogram(sample_array, bins=100, range=(5, 5.6))
 
 # Perform binned ML fit of parameters.
