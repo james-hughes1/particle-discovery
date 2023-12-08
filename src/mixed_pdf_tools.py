@@ -110,10 +110,15 @@ def pdf_h0_fast(x, la=None):
 
 def cdf_h0_fast(x, la=None):
     if la is None:
-        return WEIGHT_B_H0 * expon.cdf(x, loc=0, scale=2.0)
+        cdf_b = expon.cdf(x, loc=0, scale=2.0) - expon.cdf(
+            5.0, loc=0, scale=2.0
+        )
+        return WEIGHT_B_H0 * cdf_b
     else:
         weight_b = 1.0 / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        cdf_b = expon.cdf(x, loc=0, scale=1 / la)
+        cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
+            5.0, loc=0, scale=1 / la
+        )
         return weight_b * cdf_b
 
 
@@ -141,17 +146,23 @@ def pdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
 
 def cdf_h1_fast(x, f=None, la=None, mu=None, sg=None):
     if la is None:
-        return (WEIGHT_S_H1 * norm.cdf(x, loc=5.28, scale=0.018)) + (
-            WEIGHT_B_H1 * expon.cdf(x, loc=0, scale=2.0)
+        cdf_s = norm.cdf(x, loc=5.28, scale=0.018) - norm.cdf(
+            5.0, loc=5.28, scale=0.018
         )
+        cdf_b = expon.cdf(x, loc=0, scale=2.0) - expon.cdf(
+            5.0, loc=0, scale=2.0
+        )
+        return (WEIGHT_S_H1 * cdf_s) + (WEIGHT_B_H1 * cdf_b)
     else:
         weight_s = (2 * f) / (
             erf((5.6 - mu) / (sg * np.sqrt(2)))
             - erf((5.0 - mu) / (sg * np.sqrt(2)))
         )
         weight_b = (1 - f) / (np.exp(-la * 5.0) - np.exp(-la * 5.6))
-        cdf_s = norm.cdf(x, loc=mu, scale=sg)
-        cdf_b = expon.cdf(x, loc=0, scale=1 / la)
+        cdf_s = norm.cdf(x, loc=mu, scale=sg) - norm.cdf(5.0, loc=mu, scale=sg)
+        cdf_b = expon.cdf(x, loc=0, scale=1 / la) - expon.cdf(
+            5.0, loc=0, scale=1 / la
+        )
         return (weight_s * cdf_s) + (weight_b * cdf_b)
 
 
@@ -179,3 +190,39 @@ def compute_llr(sample_array):
 
     # Return the log-likelihood ratio.
     return nll_b_value - nll_sb_value
+
+
+REJ_SAMPLE_BINS = np.linspace(5.0, 5.6, 4)
+REJ_SAMPLE_WEIGHTS_H1 = cdf_h1_fast(REJ_SAMPLE_BINS[1:]) - cdf_h1_fast(
+    REJ_SAMPLE_BINS[:-1]
+)
+REJ_SAMPLE_YMAX_H1 = np.zeros(3)
+for bin_idx in range(3):
+    x = np.linspace(
+        REJ_SAMPLE_BINS[bin_idx], REJ_SAMPLE_BINS[bin_idx + 1], 1000001
+    )
+    REJ_SAMPLE_YMAX_H1[bin_idx] = np.max(pdf_h1_fast(x))
+
+
+def rej_sample_h1_fast(sample_size, max_jobs):
+    print(REJ_SAMPLE_WEIGHTS_H1)
+    subsample_sizes = [
+        int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H1
+    ]
+    sample = []
+    for subsample_idx, size in enumerate(subsample_sizes):
+        subsample = []
+        jobs = 0
+        lower, upper = (
+            REJ_SAMPLE_BINS[subsample_idx],
+            REJ_SAMPLE_BINS[subsample_idx + 1],
+        )
+        y_max = REJ_SAMPLE_YMAX_H1[subsample_idx]
+        while len(sample) < subsample_sizes[subsample_idx] and jobs < max_jobs:
+            x = np.random.uniform(lower, upper)
+            y = np.random.uniform(0, y_max)
+            if y < pdf_h1_fast(x):
+                subsample.append(x)
+            jobs += 1
+        sample = sample + subsample
+    return sample
