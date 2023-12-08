@@ -46,8 +46,18 @@ def cdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
 
 
 def plot_signal_background_mixed(
-    f, la, mu, sg, alpha, beta, filename, npoints=1001, sample_hist=None
+    f,
+    la,
+    mu,
+    sg,
+    filename,
+    alpha=None,
+    beta=None,
+    npoints=1001,
+    sample_hist=None,
 ):
+    if alpha is None:
+        alpha, beta = 5.0, 5.6
     fig, ax = plt.subplots(figsize=(10, 8))
     x_plot = np.linspace(alpha, beta, npoints)
     if sample_hist is not None:
