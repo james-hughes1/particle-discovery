@@ -1,21 +1,21 @@
 Timer unit: 1e-09 s
 
-Total time: 52.4494 s
+Total time: 4.84417 s
 File: /home/jhughes2712/projects/s1_assessment/jh2284/src/solve_part_f.py
 Function: T_simulation at line 8
 
 Line #      Hits         Time  Per Hit   % Time  Line Contents
 ==============================================================
      8                                           def T_simulation(N, N_toys):
-     9         1      11335.0  11335.0      0.0      T_sb_sample = np.zeros(N_toys)
-    10         1        633.0    633.0      0.0      T_b_sample = np.zeros(N_toys)
-    11       101   51767017.0 512544.7      0.1      for toy_idx in tqdm(range(N_toys)):
-    12       100        3e+10    3e+08     55.9          sample_array_sb = rej_sample_h1_fast(N, 10 * N)
-    13       100 2268441222.0    2e+07      4.3          T_sb_sample[toy_idx] = compute_llr(sample_array_sb)
+     9         1     259903.0 259903.0      0.0      T_sb_sample = np.zeros(N_toys)
+    10         1       6479.0   6479.0      0.0      T_b_sample = np.zeros(N_toys)
+    11       101   28298823.0 280186.4      0.6      for toy_idx in tqdm(range(N_toys)):
+    12       100   33795355.0 337953.5      0.7          sample_array_sb = sample_h1_fast(N)
+    13       100 2357779278.0    2e+07     48.7          T_sb_sample[toy_idx] = compute_llr(sample_array_sb)
     14
-    15       100        2e+10    2e+08     31.2          sample_array_b = rej_sample_h0_fast(N, 10 * N)
-    16       100 4118633596.0    4e+07      7.9          T_b_sample[toy_idx] = compute_llr(sample_array_b)
+    15       100   30867088.0 308670.9      0.6          sample_array_b = sample_h0_fast(N)
+    16       100 2132411952.0    2e+07     44.0          T_b_sample[toy_idx] = compute_llr(sample_array_b)
     17
-    18         1  167979949.0    2e+08      0.3      fig, ax = plt.subplots(figsize=(10, 8))
-    19         1   19760786.0    2e+07      0.0      ax.hist(np.concatenate([T_sb_sample, T_b_sample]))
-    20         1  129048056.0    1e+08      0.2      plt.savefig("outputs/T_simulation.png")
+    18         1  144670757.0    1e+08      3.0      fig, ax = plt.subplots(figsize=(10, 8))
+    19         1   13949124.0    1e+07      0.3      ax.hist(np.concatenate([T_sb_sample, T_b_sample]))
+    20         1  102126502.0    1e+08      2.1      plt.savefig("outputs/T_simulation.png")

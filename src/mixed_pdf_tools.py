@@ -192,75 +192,41 @@ def compute_llr(sample_array):
     return nll_b_value - nll_sb_value
 
 
-N_REJ_SAMPLE_BINS = 10
-REJ_SAMPLE_BINS = np.linspace(5.0, 5.6, N_REJ_SAMPLE_BINS + 1)
-REJ_SAMPLE_WEIGHTS_H1 = cdf_h1_fast(REJ_SAMPLE_BINS[1:]) - cdf_h1_fast(
-    REJ_SAMPLE_BINS[:-1]
+GRANULAR = 5
+input_space = np.linspace(5.0, 5.6, int(10**GRANULAR))
+
+cdf_mixed_approx_h1 = cdf_norm_expon_mixed(
+    input_space, 0.1, 0.5, 5.28, 0.018, 5.0, 5.6
 )
-REJ_SAMPLE_YMAX_H1 = np.zeros(N_REJ_SAMPLE_BINS)
-for bin_idx in range(N_REJ_SAMPLE_BINS):
-    x = np.linspace(
-        REJ_SAMPLE_BINS[bin_idx], REJ_SAMPLE_BINS[bin_idx + 1], 1000001
+quantiles_h1 = np.linspace(0.0, 1.0, int(10**GRANULAR))
+cdf_mixed_inv_h1_01 = np.zeros(int(10**GRANULAR))
+for quantile_idx, quantile in enumerate(quantiles_h1):
+    cdf_mixed_inv_h1_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
+        cdf_mixed_approx_h1 < quantiles_h1[quantile_idx]
     )
-    REJ_SAMPLE_YMAX_H1[bin_idx] = np.max(pdf_h1_fast(x))
+CDF_MIXED_INV_APPROX_H1 = 5.0 + 0.6 * cdf_mixed_inv_h1_01
+
+cdf_mixed_approx_h0 = cdf_norm_expon_mixed(
+    input_space, 0.0, 0.5, 5.28, 0.018, 5.0, 5.6
+)
+quantiles_h0 = np.linspace(0.0, 1.0, int(10**GRANULAR))
+cdf_mixed_inv_h0_01 = np.zeros(int(10**GRANULAR))
+for quantile_idx, quantile in enumerate(quantiles_h0):
+    cdf_mixed_inv_h0_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
+        cdf_mixed_approx_h0 < quantiles_h0[quantile_idx]
+    )
+CDF_MIXED_INV_APPROX_H0 = 5.0 + 0.6 * cdf_mixed_inv_h0_01
 
 
-def rej_sample_h1_fast(sample_size, max_jobs):
-    subsample_sizes = [
-        int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H1
-    ]
-    sample = []
-    for subsample_idx, size in enumerate(subsample_sizes):
-        subsample = []
-        jobs = 0
-        lower, upper = (
-            REJ_SAMPLE_BINS[subsample_idx],
-            REJ_SAMPLE_BINS[subsample_idx + 1],
-        )
-        y_max = REJ_SAMPLE_YMAX_H1[subsample_idx]
-        while (
-            len(subsample) < subsample_sizes[subsample_idx] and jobs < max_jobs
-        ):
-            x = np.random.uniform(lower, upper)
-            y = np.random.uniform(0, y_max)
-            if y < pdf_h1_fast(x):
-                subsample.append(x)
-            jobs += 1
-        sample = sample + subsample
+def sample_h1_fast(sample_size):
+    g = np.random.default_rng(seed=1)
+    uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
+    sample = CDF_MIXED_INV_APPROX_H1[uniform_sample]
     return sample
 
 
-REJ_SAMPLE_WEIGHTS_H0 = cdf_h0_fast(REJ_SAMPLE_BINS[1:]) - cdf_h0_fast(
-    REJ_SAMPLE_BINS[:-1]
-)
-REJ_SAMPLE_YMAX_H0 = np.zeros(N_REJ_SAMPLE_BINS)
-for bin_idx in range(N_REJ_SAMPLE_BINS):
-    x = np.linspace(
-        REJ_SAMPLE_BINS[bin_idx], REJ_SAMPLE_BINS[bin_idx + 1], 1000001
-    )
-    REJ_SAMPLE_YMAX_H0[bin_idx] = np.max(pdf_h0_fast(x))
-
-
-def rej_sample_h0_fast(sample_size, max_jobs):
-    subsample_sizes = [
-        int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H0
-    ]
-    sample = []
-    for subsample_idx, size in enumerate(subsample_sizes):
-        subsample = []
-        jobs = 0
-        lower, upper = (
-            REJ_SAMPLE_BINS[subsample_idx],
-            REJ_SAMPLE_BINS[subsample_idx + 1],
-        )
-        y_max = REJ_SAMPLE_YMAX_H0[subsample_idx]
-        while (
-            len(subsample) < subsample_sizes[subsample_idx] and jobs < max_jobs
-        ):
-            x = np.random.uniform(lower, upper)
-            y = np.random.uniform(0, y_max)
-            if y < pdf_h0_fast(x):
-                subsample.append(x)
-            jobs += 1
-        sample = sample + subsample
+def sample_h0_fast(sample_size):
+    g = np.random.default_rng(seed=2)
+    uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
+    sample = CDF_MIXED_INV_APPROX_H0[uniform_sample]
     return sample
