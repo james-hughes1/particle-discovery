@@ -205,10 +205,10 @@ for bin_idx in range(3):
 
 
 def rej_sample_h1_fast(sample_size, max_jobs):
-    print(REJ_SAMPLE_WEIGHTS_H1)
     subsample_sizes = [
         int(size) for size in sample_size * REJ_SAMPLE_WEIGHTS_H1
     ]
+    print(subsample_sizes)
     sample = []
     for subsample_idx, size in enumerate(subsample_sizes):
         subsample = []
@@ -218,11 +218,14 @@ def rej_sample_h1_fast(sample_size, max_jobs):
             REJ_SAMPLE_BINS[subsample_idx + 1],
         )
         y_max = REJ_SAMPLE_YMAX_H1[subsample_idx]
-        while len(sample) < subsample_sizes[subsample_idx] and jobs < max_jobs:
+        while (
+            len(subsample) < subsample_sizes[subsample_idx] and jobs < max_jobs
+        ):
             x = np.random.uniform(lower, upper)
             y = np.random.uniform(0, y_max)
             if y < pdf_h1_fast(x):
                 subsample.append(x)
             jobs += 1
         sample = sample + subsample
+    print(len(sample))
     return sample
