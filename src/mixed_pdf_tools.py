@@ -158,9 +158,9 @@ def compute_llr(sample_array):
 
     # Perform binned ML fit of parameters using signal+background model.
     nll_sb = BinnedNLL(nh, xe, cdf_h1_fast)
-    mi = Minuit(nll_sb, f=0.5, la=1.0, mu=5.3, sg=0.01)
+    mi = Minuit(nll_sb, f=0.2, la=0.6, mu=5.3, sg=0.02)
     mi.limits["f"] = (0, 1)
-    mi.limits["la"] = (1e-9, 1e2)
+    mi.limits["la"] = (1e-3, 1e2)
     mi.limits["mu"] = (5.0, 5.6)
     mi.limits["sg"] = (1e-9, 10)
     mi.migrad()
@@ -168,8 +168,8 @@ def compute_llr(sample_array):
 
     # Perform binned ML fit using background only model.
     nll_b = BinnedNLL(nh, xe, cdf_h0_fast)
-    mi = Minuit(nll_b, la=1.0)
-    mi.limits["la"] = (1e-9, 1e2)
+    mi = Minuit(nll_b, la=0.6)
+    mi.limits["la"] = (1e-3, 1e2)
     mi.migrad()
     nll_b_value = mi.fval
 
