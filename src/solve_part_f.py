@@ -3,8 +3,8 @@ import time
 from tqdm import tqdm
 
 # Set simulation parameters.
-N_toys = 10000
-N_min, N_max, N_step = 650, 750, 10
+N_toys = 1000
+N_min, N_max, N_step = 50, 1000, 50
 
 filename = (
     "simulation_study_"
@@ -34,8 +34,8 @@ for N in tqdm(range(N_min, N_max, N_step)):
     )
     T0_list.append(T0)
     power_list.append(power)
-    coverage_h1.append(covered_total_h1 / (4 * N_toys))
-    coverage_h0.append(covered_total_h0 / N_toys)
+    coverage_h1.append(covered_total_h1 / (4 * valid_toys))
+    coverage_h0.append(covered_total_h0 / valid_toys)
     valid_sims.append(valid_toys / N_toys)
 end = time.time()
 exec_time = end - start

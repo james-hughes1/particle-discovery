@@ -181,23 +181,31 @@ def chi2_pdf(x, dof):
 def T_simulation(N, N_toys):
     T_sb_sample = np.zeros(N_toys)
     T_b_sample = np.zeros(N_toys)
-    covered_total_h1 = 0
-    covered_total_h0 = 0
-    valid_toys = 0
+    covered_h1 = np.zeros(N_toys)
+    covered_h0 = np.zeros(N_toys)
+    valid_toys = np.zeros(N_toys)
     for toy_idx in range(N_toys):
         sample_array_sb = sample_h1_fast(N, toy_idx)
-        T_sb_sample[toy_idx], covered_h1, _, valid_llr_sb = compute_llr(
+        T_sb_sample[toy_idx], covered_h1_toy, _, valid_llr_sb = compute_llr(
             sample_array_sb, h0_bool=False
         )
 
         sample_array_b = sample_h0_fast(N, toy_idx)
-        T_b_sample[toy_idx], _, covered_h0, valid_llr_b = compute_llr(
+        T_b_sample[toy_idx], _, covered_h0_toy, valid_llr_b = compute_llr(
             sample_array_b, h0_bool=True
         )
 
-        covered_total_h1 += covered_h1
-        covered_total_h0 += covered_h0
-        valid_toys += 1 * (valid_llr_sb and valid_llr_b)
+        covered_h1[toy_idx] = covered_h1_toy
+        covered_h0[toy_idx] = covered_h0_toy
+        valid_toys[toy_idx] = 1 * (valid_llr_sb and valid_llr_b)
+
+    # Filter to only use data for when all the minuit fits in the thrown toy
+    # converged to a valid minimum.
+    valid_toys_total = np.sum(valid_toys)
+    T_sb_sample = T_sb_sample[valid_toys == 1]
+    T_b_sample = T_b_sample[valid_toys == 1]
+    covered_total_h1 = np.sum(covered_h1[valid_toys == 1])
+    covered_total_h0 = np.sum(covered_h0[valid_toys == 1])
 
     nll = UnbinnedNLL(T_b_sample, chi2_pdf)
     mi = Minuit(nll, dof=3.0)
@@ -206,4 +214,4 @@ def T_simulation(N, N_toys):
     dof_T_b = mi.values["dof"]
     T0 = chi2.ppf(1 - (2.9e-7), dof_T_b)
     power = np.sum(T_sb_sample > T0) / T_sb_sample.shape[0]
-    return T0, power, covered_total_h1, covered_total_h0, valid_toys
+    return T0, power, covered_total_h1, covered_total_h0, valid_toys_total
