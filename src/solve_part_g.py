@@ -4,8 +4,8 @@ from tqdm import tqdm
 
 # Set simulation parameters.
 N_toys = 100
-N_min, N_max, N_step = 700, 710, 1
-model = "f"
+N_min, N_max, N_step = 10000, 10200, 100
+model = "g"
 
 filename = (
     "simulation_study_"
@@ -32,14 +32,14 @@ valid_sims = []
 start = time.time()
 for N in tqdm(range(N_min, N_max, N_step)):
     N_list.append(N)
-    # Plot on the first simulation
+    # Plot on the first simulation.
     T0, power, covered_total_h1, covered_total_h0, valid_toys = T_simulation(
-        N, N_toys, "f", (N == N_min)
+        N, N_toys, model, (N == N_min)
     )
     T0_list.append(T0)
     power_list.append(power)
     coverage_h1.append(covered_total_h1 / (4 * valid_toys))
-    coverage_h0.append(covered_total_h0 / valid_toys)
+    coverage_h0.append(covered_total_h0 / (6 * valid_toys))
     valid_sims.append(valid_toys / N_toys)
 end = time.time()
 exec_time = end - start
@@ -47,6 +47,7 @@ exec_time = end - start
 
 # Write simulation study data to file.
 with open("outputs/" + filename, "w") as f:
+    f.write("Model: {}\n".format(model))
     f.write(
         "N_min: {}  N_max: {}   N_step: {}  N_toys: {}\n".format(
             N_min, N_max, N_step, N_toys
