@@ -1,29 +1,33 @@
-from mixed_pdf_tools import sample_h0_fast, sample_h1_fast, compute_llr
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-import numpy as np
-from line_profiler import LineProfiler
+from mixed_pdf_tools import T_simulation
+import time
 
 
-def T_simulation(N, N_toys):
-    T_sb_sample = np.zeros(N_toys)
-    T_b_sample = np.zeros(N_toys)
-    for toy_idx in tqdm(range(N_toys)):
-        sample_array_sb = sample_h1_fast(N)
-        T_sb_sample[toy_idx] = compute_llr(sample_array_sb)
+N_toys = 1000
+N_list = []
+T0_list = []
+power_list = []
+N_min, N_max, N_step = 900, 1000, 20
+start = time.time()
+for N in range(N_min, N_max, N_step):
+    N_list.append(N)
+    T0, power = T_simulation(N, N_toys)
+    T0_list.append(T0)
+    power_list.append(power)
+end = time.time()
+exec_time = end - start
 
-        sample_array_b = sample_h0_fast(N)
-        T_b_sample[toy_idx] = compute_llr(sample_array_b)
+filename = "simulation_study_f_1.txt"
 
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.hist(T_sb_sample)
-    plt.savefig("outputs/T_H1_simulation.png")
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.hist(T_b_sample)
-    plt.savefig("outputs/T_H0_simulation.png")
-
-
-lp = LineProfiler()
-lp_wrapper = lp(T_simulation)
-lp_wrapper(100000, 100)
-lp.print_stats()
+with open("data/" + filename, "w") as f:
+    f.write(
+        "N_min: {}  N_max: {}   N_step: {}  N_toys: {}\n".format(
+            N_min, N_max, N_step, N_toys
+        )
+    )
+    f.write("Execution time = {}\n".format(exec_time))
+    for idx in range(len(N_list)):
+        f.write(
+            "N: {:>5}   |   T0: {:.6f}, Power: {:.6f}\n".format(
+                N_list[idx], T0_list[idx], power_list[idx]
+            )
+        )
