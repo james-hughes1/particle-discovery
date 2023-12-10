@@ -32,9 +32,9 @@ valid_sims = []
 start = time.time()
 for N in tqdm(range(N_min, N_max, N_step)):
     N_list.append(N)
-    # Plot on the first simulation
+    # Plot on the last simulation.
     T0, power, covered_total_h1, covered_total_h0, valid_toys = T_simulation(
-        N, N_toys, "f", (N == N_min)
+        N, N_toys, "f", (N == N_max - N_step)
     )
     T0_list.append(T0)
     power_list.append(power)

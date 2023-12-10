@@ -213,7 +213,9 @@ def compute_llr_g(sample_array):
 
     # Perform binned ML fit using 2 signal + background model.
     nll_2sb = BinnedNLL(nh, xe, cdf_2sb_fast)
-    mi = Minuit(nll_2sb, f1=0.05, f2=0.05, la=0.5, mu1=5.3, mu2=5.3, sg=0.01)
+    mi = Minuit(
+        nll_2sb, f1=0.05, f2=0.05, la=0.5, mu1=5.28, mu2=5.35, sg=0.018
+    )
     mi.limits["f1"] = (0.0, 1.0)
     mi.limits["f2"] = (0.0, 1.0)
     mi.limits["la"] = (0.01, 10)
@@ -237,7 +239,7 @@ def compute_llr_g(sample_array):
 
     # Perform binned ML fit of parameters using signal+background model.
     nll_sb = BinnedNLL(nh, xe, cdf_sb_fast)
-    mi = Minuit(nll_sb, f=0.05, la=0.5, mu=5.3, sg=0.01)
+    mi = Minuit(nll_sb, f=0.1, la=0.5, mu=5.3, sg=0.018)
     mi.limits["f"] = (0.0, 1.0)
     mi.limits["la"] = (0.01, 10)
     mi.limits["mu"] = (5.0, 5.6)
@@ -325,7 +327,7 @@ def T_simulation(N, N_toys, model, plot):
 
     # Plot the simulated distributions of T.
     if plot:
-        x_plot = np.linspace(0, np.max(T_h1_sample))
+        x_plot = np.linspace(0, np.max(T_h1_sample), 201)
         fig, ax = plt.subplots()
         ax.plot(
             x_plot,
@@ -334,10 +336,18 @@ def T_simulation(N, N_toys, model, plot):
             c="blue",
         )
         ax.hist(
-            T_h1_sample, label="Distribution under H1", alpha=0.6, color="red"
+            T_h1_sample,
+            bins=10,
+            label="Distribution under H1",
+            alpha=0.6,
+            color="red",
         )
         ax.hist(
-            T_h0_sample, label="Distribution under H0", alpha=0.6, color="blue"
+            T_h0_sample,
+            bins=10,
+            label="Distribution under H0",
+            alpha=0.6,
+            color="blue",
         )
         plt.axvline(
             T0,
@@ -348,7 +358,7 @@ def T_simulation(N, N_toys, model, plot):
         ax.legend()
         ax.set(
             title=f"Simulated distributions of T: model={model}, N={N}, "
-            "N_toys={N_toys}"
+            f"N_toys={N_toys}"
         )
         plt.savefig(f"outputs/T_distributions_{model}_{N}_{N_toys}.png")
     return T0, power, covered_total_h1, covered_total_h0, valid_toys_total
