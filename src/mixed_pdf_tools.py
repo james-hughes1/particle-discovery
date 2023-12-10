@@ -80,48 +80,60 @@ def compute_llr(sample_array, h0_bool):
 
     # Perform binned ML fit of parameters using signal+background model.
     nll_sb = BinnedNLL(nh, xe, cdf_h1_fast)
-    mi = Minuit(nll_sb, f=0.0, la=0.5, mu=5.3, sg=0.018)
-    if h0_bool:
-        mi.limits["f"] = (-0.1, 0.1)
-        mi.values["f"] = 0.0
-    else:
-        mi.limits["f"] = (0.0, 0.2)
-        mi.values["f"] = 0.1
-    mi.limits["la"] = (0.4, 0.6)
-    mi.limits["mu"] = (5.2, 5.4)
-    mi.limits["sg"] = (0.01, 0.02)
-    mi.values["la"] = 0.5
-    mi.values["mu"] = 5.3
-    mi.values["sg"] = 0.018
+    mi = Minuit(nll_sb, f=0.05, la=0.5, mu=5.3, sg=0.01)
+    mi.limits["f"] = (0.0, 1.0)
+    mi.limits["la"] = (0.01, 10)
+    mi.limits["mu"] = (5.0, 5.6)
+    mi.limits["sg"] = (0.001, 0.6)
     mi.migrad()
+    param_ci_upper_h1 = np.array(mi.values) + np.array(mi.errors)
+    param_ci_lower_h1 = np.array(mi.values) - np.array(mi.errors)
+    param_true = np.array([0.1, 0.5, 5.28, 0.018])
+    covered_h1 = np.sum(
+        (param_ci_lower_h1 < param_true) & (param_true < param_ci_upper_h1)
+    )
+    valid_fit_h1 = mi.valid
     nll_sb_value = mi.fval
 
     # Perform binned ML fit using background only model.
     nll_b = BinnedNLL(nh, xe, cdf_h0_fast)
-    mi = Minuit(nll_b, la=0.51)
-    mi.limits["la"] = (0.4, 0.6)
-    mi.values["la"] = 0.5
+    mi = Minuit(nll_b, la=0.5)
+    mi.limits["la"] = (0.01, 10)
     mi.migrad()
+    covered_h0 = 1 * (
+        (mi.values["la"] - mi.errors["la"] < 0.5)
+        and (0.5 < mi.values["la"] + mi.errors["la"])
+    )
+    valid_fit_h0 = mi.valid
     nll_b_value = mi.fval
 
+    valid_llr = valid_fit_h1 and valid_fit_h0
+
     # Return the log-likelihood ratio.
-    return nll_b_value - nll_sb_value
+    return (nll_b_value - nll_sb_value), covered_h1, covered_h0, valid_llr
 
 
+# Create global variables that enable fast inverse CDF sampling,
+# sacrificing some memory overhead to enable fast processing.
 GRANULAR = 5
 input_space = np.linspace(5.0, 5.6, int(10**GRANULAR))
 
+# Compute CDF values across interval [5.0, 5.6].
 cdf_mixed_approx_h1 = cdf_norm_expon_mixed(
     input_space, 0.1, 0.5, 5.28, 0.018, 5.0, 5.6
 )
 quantiles_h1 = np.linspace(0.0, 1.0, int(10**GRANULAR))
 cdf_mixed_inv_h1_01 = np.zeros(int(10**GRANULAR))
+# For each quantile in [0.0, 1.0], find how far into the range [5.0, 5.6] you
+# need to go in order for the cdf to equal the quantile.
 for quantile_idx, quantile in enumerate(quantiles_h1):
     cdf_mixed_inv_h1_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
         cdf_mixed_approx_h1 < quantiles_h1[quantile_idx]
     )
+# Transform into the interval [5.0, 5.6].
 CDF_MIXED_INV_APPROX_H1 = 5.0 + 0.6 * cdf_mixed_inv_h1_01
 
+# Repeat above for background only model.
 cdf_mixed_approx_h0 = cdf_norm_expon_mixed(
     input_space, 0.0, 0.5, 5.28, 0.018, 5.0, 5.6
 )
@@ -134,6 +146,7 @@ for quantile_idx, quantile in enumerate(quantiles_h0):
 CDF_MIXED_INV_APPROX_H0 = 5.0 + 0.6 * cdf_mixed_inv_h0_01
 
 
+# Inverse cdf sampling of signal+background model.
 def sample_h1_fast(sample_size, seed):
     g = np.random.default_rng(seed=seed)
     uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
@@ -141,6 +154,7 @@ def sample_h1_fast(sample_size, seed):
     return sample
 
 
+# Inverse cdf sampling of background only model.
 def sample_h0_fast(sample_size, seed):
     g = np.random.default_rng(seed=seed)
     uniform_sample = g.integers(low=0, high=(10**GRANULAR), size=sample_size)
@@ -148,6 +162,8 @@ def sample_h0_fast(sample_size, seed):
     return sample
 
 
+# Implement faster cdf functions so that minuit fits faster in simulation
+# study.
 def cdf_h1_fast(x, f, la, mu, sg):
     return (f * truncnorm.cdf(x, 5.0, 5.6, loc=mu, scale=sg)) + (
         (1 - f) * truncexpon.cdf(x, 5.0, 5.6, loc=0.0, scale=1 / la)
@@ -158,16 +174,6 @@ def cdf_h0_fast(x, la):
     return truncexpon.cdf(x, 5.0, 5.6, loc=0.0, scale=1 / la)
 
 
-def pdf_h1_fast(x, f, la, mu, sg):
-    return (f * truncnorm.pdf(x, 5.0, 5.6, loc=mu, scale=sg)) + (
-        (1 - f) * truncexpon.pdf(x, 5.0, 5.6, loc=0.0, scale=1 / la)
-    )
-
-
-def pdf_h0_fast(x, la):
-    return truncexpon.pdf(x, 5.0, 5.6, loc=0.0, scale=1 / la)
-
-
 def chi2_pdf(x, dof):
     return chi2.pdf(x, dof)
 
@@ -175,12 +181,23 @@ def chi2_pdf(x, dof):
 def T_simulation(N, N_toys):
     T_sb_sample = np.zeros(N_toys)
     T_b_sample = np.zeros(N_toys)
+    covered_total_h1 = 0
+    covered_total_h0 = 0
+    valid_toys = 0
     for toy_idx in range(N_toys):
         sample_array_sb = sample_h1_fast(N, toy_idx)
-        T_sb_sample[toy_idx] = compute_llr(sample_array_sb, h0_bool=False)
+        T_sb_sample[toy_idx], covered_h1, _, valid_llr_sb = compute_llr(
+            sample_array_sb, h0_bool=False
+        )
 
         sample_array_b = sample_h0_fast(N, toy_idx)
-        T_b_sample[toy_idx] = compute_llr(sample_array_b, h0_bool=True)
+        T_b_sample[toy_idx], _, covered_h0, valid_llr_b = compute_llr(
+            sample_array_b, h0_bool=True
+        )
+
+        covered_total_h1 += covered_h1
+        covered_total_h0 += covered_h0
+        valid_toys += 1 * (valid_llr_sb and valid_llr_b)
 
     nll = UnbinnedNLL(T_b_sample, chi2_pdf)
     mi = Minuit(nll, dof=3.0)
@@ -189,4 +206,4 @@ def T_simulation(N, N_toys):
     dof_T_b = mi.values["dof"]
     T0 = chi2.ppf(1 - (2.9e-7), dof_T_b)
     power = np.sum(T_sb_sample > T0) / T_sb_sample.shape[0]
-    return T0, power
+    return T0, power, covered_total_h1, covered_total_h0, valid_toys

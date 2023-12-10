@@ -2,9 +2,9 @@ from mixed_pdf_tools import T_simulation
 import time
 from tqdm import tqdm
 
-# Set simulation parameters
-N_toys = 5000
-N_min, N_max, N_step = 700, 800, 10
+# Set simulation parameters.
+N_toys = 10
+N_min, N_max, N_step = 50, 1000, 50
 
 filename = (
     "simulation_study_"
@@ -19,30 +19,47 @@ filename = (
 )
 
 
-# Run simulation
+# Run simulation.
 N_list = []
 T0_list = []
 power_list = []
+coverage_h1 = []
+coverage_h0 = []
+valid_sims = []
 start = time.time()
 for N in tqdm(range(N_min, N_max, N_step)):
     N_list.append(N)
-    T0, power = T_simulation(N, N_toys)
+    T0, power, covered_total_h1, covered_total_h0, valid_toys = T_simulation(
+        N, N_toys
+    )
     T0_list.append(T0)
     power_list.append(power)
+    coverage_h1.append(covered_total_h1 / (4 * N_toys))
+    coverage_h0.append(covered_total_h0 / N_toys)
+    valid_sims.append(valid_toys / N_toys)
 end = time.time()
 exec_time = end - start
 
 
-with open("data/" + filename, "w") as f:
+# Write simulation study data to file.
+with open("outputs/" + filename, "w") as f:
     f.write(
         "N_min: {}  N_max: {}   N_step: {}  N_toys: {}\n".format(
             N_min, N_max, N_step, N_toys
         )
     )
-    f.write("Execution time = {}s\n".format(exec_time))
-    for idx in range(len(N_list)):
+    f.write("Execution time = {:.3f}s\n\n\n".format(exec_time))
+    f.write(
+        "{:>5}||{:<8}|{:<8}|{:<8}|{:<9}|{:<11}\n".format(
+            "N", "C. H1", "C. H0", "Valid", "T0", "Power"
+        )
+    )
+    f.write("-----++--------+--------+--------+---------+-----------\n")
+    for sim_data in zip(
+        N_list, coverage_h1, coverage_h0, valid_sims, T0_list, power_list
+    ):
         f.write(
-            "N: {:>5}   |   T0: {:.6f}, Power: {:.6f}\n".format(
-                N_list[idx], T0_list[idx], power_list[idx]
+            "{:>5}||{:<8.3f}|{:<8.3f}|{:<8.3f}|{:<9.3f}|{:<11.6f}\n".format(
+                *sim_data
             )
         )
