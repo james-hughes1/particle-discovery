@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from iminuit import Minuit
 from iminuit.cost import BinnedNLL, UnbinnedNLL
 from scipy.stats import chi2
-from tqdm import tqdm
 
 
 def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
@@ -176,7 +175,7 @@ def chi2_pdf(x, dof):
 def T_simulation(N, N_toys):
     T_sb_sample = np.zeros(N_toys)
     T_b_sample = np.zeros(N_toys)
-    for toy_idx in tqdm(range(N_toys)):
+    for toy_idx in range(N_toys):
         sample_array_sb = sample_h1_fast(N, toy_idx)
         T_sb_sample[toy_idx] = compute_llr(sample_array_sb, h0_bool=False)
 
