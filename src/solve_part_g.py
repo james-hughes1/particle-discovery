@@ -3,8 +3,8 @@ import time
 from tqdm import tqdm
 
 # Set simulation parameters.
-N_toys = 5000
-N_min, N_max, N_step = 2500, 2600, 10
+N_toys = 10000
+N_min, N_max, N_step = 2570, 2590, 4
 model = "g"
 
 filename = (
