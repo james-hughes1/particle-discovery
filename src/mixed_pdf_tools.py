@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from iminuit import Minuit
 from iminuit.cost import BinnedNLL, UnbinnedNLL
 from scipy.stats import chi2
+import time
+from tqdm import tqdm
 
 
 def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
@@ -362,3 +364,75 @@ def T_simulation(N, N_toys, model, plot):
         )
         plt.savefig(f"outputs/T_distributions_{model}_{N}_{N_toys}.png")
     return T0, power, covered_total_h1, covered_total_h0, valid_toys_total
+
+
+def find_sample_size(N_toys, N_min, N_max, N_step, model):
+    # Save to a filename indicating which parameters were used.
+    filename = (
+        "simulation_study_"
+        + str(model)
+        + "_"
+        + str(N_min)
+        + "_"
+        + str(N_max)
+        + "_"
+        + str(N_step)
+        + "_"
+        + str(N_toys)
+        + ".txt"
+    )
+
+    # Run simulation.
+    N_list = []
+    T0_list = []
+    power_list = []
+    coverage_h1 = []
+    coverage_h0 = []
+    valid_sims = []
+    start = time.time()
+    for N in tqdm(range(N_min, N_max, N_step)):
+        N_list.append(N)
+        # Plot on the last simulation.
+        (
+            T0,
+            power,
+            covered_total_h1,
+            covered_total_h0,
+            valid_toys,
+        ) = T_simulation(N, N_toys, model, (N == N_max - N_step))
+        T0_list.append(T0)
+        power_list.append(power)
+        # Adjust the average coverage figures for the number of parameters
+        # being estimated.
+        if model == "f":
+            coverage_h1.append(covered_total_h1 / (4 * valid_toys))
+            coverage_h0.append(covered_total_h0 / valid_toys)
+        else:
+            coverage_h1.append(covered_total_h1 / (6 * valid_toys))
+            coverage_h0.append(covered_total_h0 / (4 * valid_toys))
+        valid_sims.append(valid_toys / N_toys)
+    end = time.time()
+    exec_time = end - start
+
+    # Write simulation study data to file.
+    with open("outputs/" + filename, "w") as f:
+        f.write("Model: {}\n".format(model))
+        f.write(
+            "N_min: {}  N_max: {}   N_step: {}  N_toys: {}\n".format(
+                N_min, N_max, N_step, N_toys
+            )
+        )
+        f.write("Execution time = {:.3f}s\n\n\n".format(exec_time))
+        f.write(
+            "{:>5}||{:<8}|{:<8}|{:<8}|{:<9}|{:<11}\n".format(
+                "N", "C. H1", "C. H0", "Valid", "T0", "Power"
+            )
+        )
+        f.write("-----++--------+--------+--------+---------+-----------\n")
+        sim_data_format_str = (
+            "{:>5}||{:<8.3f}|{:<8.3f}|{:<8.3f}|{:<9.3f}|{:<11.6f}\n"
+        )
+        for sim_data in zip(
+            N_list, coverage_h1, coverage_h0, valid_sims, T0_list, power_list
+        ):
+            f.write(sim_data_format_str.format(*sim_data))
