@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 # Set simulation parameters.
 N_toys = 10000
-N_min, N_max, N_step = 2570, 2590, 4
+N_min, N_max, N_step = 2550, 2660, 10
 model = "g"
 
 filename = (
