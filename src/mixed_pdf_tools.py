@@ -41,40 +41,6 @@ def cdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
     return (weight_s * cdf_s) + (weight_b * cdf_b)
 
 
-def plot_signal_background_mixed(
-    f,
-    la,
-    mu,
-    sg,
-    alpha,
-    beta,
-    filename,
-    npoints=1001,
-    sample_hist=None,
-):
-    fig, ax = plt.subplots(figsize=(10, 8))
-    x_plot = np.linspace(alpha, beta, npoints)
-    if sample_hist is not None:
-        nh, xe = sample_hist[0], sample_hist[1]
-        cx = 0.5 * (xe[1:] + xe[:-1])
-        ax.errorbar(cx, nh, nh**0.5, fmt="ko")
-        scale_factor = np.sum(nh) * (xe[1] - xe[0])
-    else:
-        scale_factor = 1
-    pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
-    pdf_b = expon.pdf(x_plot, loc=0, scale=1 / la)
-    pdf_sb = pdf_norm_expon_mixed(x_plot, f, la, mu, sg, alpha, beta)
-    weight_s = (2 * f) / (
-        erf((beta - mu) / (sg * np.sqrt(2)))
-        - erf((alpha - mu) / (sg * np.sqrt(2)))
-    )
-    weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
-    ax.plot(x_plot, weight_s * scale_factor * pdf_s)
-    ax.plot(x_plot, weight_b * scale_factor * pdf_b)
-    ax.plot(x_plot, scale_factor * pdf_sb)
-    plt.savefig("outputs/" + filename)
-
-
 def compute_llr_f(sample_array):
     # Separate the sample into bins.
     N = len(sample_array)
