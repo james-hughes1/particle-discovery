@@ -4,7 +4,27 @@
 \author{James Hughes}
 
 \usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+
 \DeclareMathOperator{\erf}{erf}
+\lstdefinestyle{style1}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{magenta},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=style1}
+
 
 \begin{document}
 
@@ -79,15 +99,48 @@ We then compute the relevant integrals:
 \end{align*}
 
 The properly normalised probability density function for $M\in[\alpha,\beta]$ is then
-\[
+\begin{equation}
+\label{eqpdf}
     p_r(M;\boldsymbol{\theta}) = \frac{2f}{\erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right) - \erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)}s(M;\mu,\sigma) + \frac{1-f}{e^{-\lambda\alpha} - e^{-\lambda\beta}}b(M;\lambda)
-\]
+\end{equation}
+
 where $s(M;\mu,\sigma)$ and $b(M;\lambda)$ are as given on the sheet. Note that the value for $p_r(M)$ is zero when $M\notin[\alpha,\beta]$.
 
 \subsection*{Part (c)}
 
+To implement the expressions for the probability density function, I created the following function in the \texttt{mixed\_pdf\_tools} module.
 
+\begin{lstlisting}[caption=Function implementing pdf for part (c).,]
+    def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
+        pdf_s = norm.pdf(x, loc=mu, scale=sg)
+        pdf_b = expon.pdf(x, loc=0, scale=1 / la)
+        weight_s = (2 * f) / (
+            erf((beta - mu) / (sg * np.sqrt(2)))
+            - erf((alpha - mu) / (sg * np.sqrt(2)))
+        )
+        weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
+        return (weight_s * pdf_s) + (weight_b * pdf_b)
+\end{lstlisting}
 
+The function takes in the argument \texttt{x}, the four parameters \texttt{f, la, mu, sg} corresponding to $f, \lambda, \mu, \sigma$ respectively, and \texttt{alpha, beta} which represent the support $[\alpha,\beta]$.
+The function first initialises two variables \texttt{pdf\_s} and \texttt{pdf\_b} which compute the signal and background parts of the density as specified by $s(.)$ and $b(.)$, without any domain restriction.
+These use the methods \texttt{norm.pdf} and \texttt{expon.pdf} from the \texttt{numba\_stats} package.
+Next we compute the coefficients of these terms as specified in \ref{eqpdf}, which incorporates the signal-to-background ratio $f$ as well as the normalisations for the interval restriction.
+These are stored in \texttt{weight\_s} and \texttt{weight\_b}
+Finally we return the weighted sum of the two pdf evaluations to give the mixed pdf value at \texttt{x}.
+
+We also check this function is properly normalised in the interval $[5, 5.6]$ using the following code
+
+\begin{lstlisting}[caption=Function checking the normalisation of the pdf for part (c).,]
+def check_normalisation(pdf, lower, upper):
+    integral_value, abserr = quad(pdf, lower, upper)
+    return integral_value
+\end{lstlisting}
+
+This code uses the \texttt{quad} method from \texttt{scipy.integrate} to integrate any function \texttt{pdf} over the given range specified by \texttt{lower}, \texttt{upper}.
+Running \texttt{python src/solve_part\_c.py} in the terminal runs a script which prints the output of this function for three different parameter settings with the interval $[5, 5.6]$; the outputs in the terminal should all read as approximately unity (within machine precision).
+
+\subsection*{Part (d)}
 
 \section*{Section B}
 
