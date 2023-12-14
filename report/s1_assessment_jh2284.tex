@@ -132,7 +132,7 @@ Finally we return the weighted sum of the two pdf evaluations to give the mixed 
 
 We also check this function is properly normalised in the interval $[5, 5.6]$ using the following code
 
-\begin{lstlisting}[caption=Function checking the normalisation of the pdf for part (c).,]
+\begin{lstlisting}[caption=Function checking the normalisation of the pdf for part (c).]
 def check_normalisation(pdf, lower, upper):
     integral_value, abserr = quad(pdf, lower, upper)
     return integral_value
@@ -158,7 +158,45 @@ The area under either of the component functions limited to an interval smaller 
 
 \subsection*{Part (e)}
 
-In part (e)
+In part (e), a large sample is generated from the true distribution, and then the sample is plotted alongside an estimate for the sample's underlying distribution.
+Originally, rejection sampling was used to create the sample, but this was found to be quite slow, a problem which was exacerbated in the simulation studies.
+Instead, an inverse CDF method was used to generate the sample.
+The inverse CDF method involves generating a sample of points uniformly distributed in $[0, 1]$, and then transforming these by the percentage point function (the inverse of the cumulative density function).
+This achieves a sample which should theoretically be distributed according to the original probability density function.
+
+This can easily be seen by letting $X$ have distribution $U(0,1)$, and transforming $Y:=F^{-1}(X)$ where $F$ is the cdf of the distribution we wish to sample from.
+Then clearly $Y$ has the desired distribution because for any $c\in(-\infty,+\infty)$,
+
+\begin{align*}
+    P(Y\in(-\infty, c)) & = P(F^{-1}(X)\in(-\infty, c)) \\
+                        & = P(X\in(0, F(c))) & \text{$F$ is monotonic and increasing}\\
+                        & = F(c) & \text{$X$ is uniformly distributed}\\
+\end{align*}
+
+Hence $Y$ has cdf $F$.
+
+In this case the cumulative distribution for the true density $p$ is intractable, and thus we have to estimate it by sampling it at high granularity using the below block of code.
+
+\begin{lstlisting}[caption=Code block producing array of values for inverse CDF of $p$ (e).]
+# Compute CDF values across interval [5.0, 5.6].
+cdf_mixed_approx_sb = cdf_norm_expon_mixed(
+    input_space, 0.1, 0.5, 5.28, 0.018, 5.0, 5.6
+)
+quantiles_sb = np.linspace(0.0, 1.0, int(10**GRANULAR))
+cdf_mixed_inv_sb_01 = np.zeros(int(10**GRANULAR))
+# For each quantile in [0.0, 1.0], find how far into the range [5.0, 5.6] you
+# need to go in order for the cdf to equal the quantile.
+for quantile_idx, quantile in enumerate(quantiles_sb):
+    cdf_mixed_inv_sb_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
+        cdf_mixed_approx_sb < quantiles_sb[quantile_idx]
+    )
+# Transform into the interval [5.0, 5.6].
+CDF_MIXED_INV_APPROX_SB = 5.0 + 0.6 * cdf_mixed_inv_sb_01
+\end{lstlisting}
+
+We then model the density function of the sample parametrically using a model of the same form as the true distribution $p$.
+We estimate the four parameters by using a binned maximum likelihood procedure: first separating the data into 100 bins, and then find maximum likelihood estimates for the parameters based on the binned data.
+This is done using the \texttt{iminuit} Python package, which outputs the Hesse error matrix for the estimates as well as the fitted values.
 
 \begin{figure}[hbt]
     \includegraphics[scale=0.4]{part_e_plot.png}
