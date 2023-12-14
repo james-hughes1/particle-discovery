@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{graphicx}
 
 \DeclareMathOperator{\erf}{erf}
 \lstdefinestyle{style1}{
@@ -14,13 +15,13 @@
     keywordstyle=\color{magenta},
     breakatwhitespace=false,
     breaklines=true,
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
 \lstset{style=style1}
@@ -138,9 +139,32 @@ def check_normalisation(pdf, lower, upper):
 \end{lstlisting}
 
 This code uses the \texttt{quad} method from \texttt{scipy.integrate} to integrate any function \texttt{pdf} over the given range specified by \texttt{lower}, \texttt{upper}.
-Running \texttt{python src/solve_part\_c.py} in the terminal runs a script which prints the output of this function for three different parameter settings with the interval $[5, 5.6]$; the outputs in the terminal should all read as approximately unity (within machine precision).
+Executing the script \texttt{solve\_part\_c.py} prints the output of this function for three different parameter settings with the interval $[5, 5.6]$; the outputs in the terminal should all read as approximately unity (within machine precision).
 
 \subsection*{Part (d)}
+
+In Figure \ref{partd} we see the underlying probability density function for $M$, which we will sample from later.
+
+\begin{figure}[hbt]
+    \includegraphics[scale=0.5]{part_d_plot.png}
+    \caption{The true underlying distribution of $M$ [generated in Python using Matplotlib].}
+    \label{partd}
+\end{figure}
+
+Note that the blue and orange lines, labelled as `density components' are the plots of the probability density functions for $M$ for the signal and background events respectively.
+However, to make the plot more intuitive, they have been multiplied by the respective proportion of that type of event in the total population.
+This means that technically neither is a probability density function, however their sum is the true mixed density for the population.
+The area under either of the component functions limited to an interval smaller than $[5, 5.6]$ is precisely the probability that an event randomly sampled from the population will be of that kind, and lie within said interval.
+
+\subsection*{Part (e)}
+
+In part (e)
+
+\begin{figure}[hbt]
+    \includegraphics[scale=0.4]{part_e_plot.png}
+    \caption{The true underlying distribution of $M$ [generated in Python using Matplotlib].}
+    \label{parte}
+\end{figure}
 
 \section*{Section B}
 
