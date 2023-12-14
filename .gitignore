@@ -1,1 +1,9 @@
+# Pycache
 __pycache__/
+
+# LaTeX Report
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.log
+report/*.synctex.gz
