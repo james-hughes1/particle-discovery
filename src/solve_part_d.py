@@ -20,9 +20,9 @@ def plot_signal_background_mixed(
     pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
     pdf_b = expon.pdf(x_plot, loc=0, scale=1 / la)
     pdf_sb = pdf_norm_expon_mixed(x_plot, f, la, mu, sg, alpha, beta)
-    root2sg = sg * np.sqrt(2)
     weight_s = (2 * f) / (
-        erf((beta - mu) / root2sg) - erf((alpha - mu) / root2sg)
+        erf((beta - mu) / sg * np.sqrt(2))
+        - erf((alpha - mu) / sg * np.sqrt(2))
     )
     weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
     ax.plot(x_plot, weight_s * pdf_s, label="Signal density component")
