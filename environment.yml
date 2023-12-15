@@ -133,4 +133,3 @@ dependencies:
   - zipp=3.11.0
   - zlib=1.2.13
   - zstd=1.5.5
-prefix: /home/jhughes2712/miniconda3/envs/mphildis_assessment_jh2284
