@@ -27,4 +27,16 @@ Next, to run the actual code you simply execute the command
 
 `python src/solve_part_[c-g].py`
 
-## Details
+## Computer specification details
+
+The repository was developed on a system with specifications
+ - Processor: Intel(R) Core(TM) i5-1035G1 CPU @ 1.00GHz, 1190 Mhz, 4 Core(s), 8 Logical Processor(s)
+ - Installed Physical Memory (RAM): 8.00 GB
+
+The following gives approximate execution times using this system:
+ - `python src/solve_part_c.py` 5 secs
+ - `python src/solve_part_d.py` 5 secs
+ - `python src/solve_part_e.py` 30 secs
+ - `python src/solve_part_f.py` 40 mins
+ - `python src/solve_part_g.py` 2 hrs
+ - `docker build -t s1_jh2284 .` 5 mins
