@@ -263,15 +263,15 @@ This is further confirmed by the $\chi^2$ value, the sum of the squares of the p
 \subsection*{Part (f)}
 
 For this section, the statistical situation involves the null hypothesis $H_0$ that there is no signal present in the data, that is, $f=0$ and the alternative hypothesis $H_1$, that there is at least one signal event, $f\in(0,1]$.
-The procedure outline is therefore:
+The procedure is outlined in the next section.
+\subsubsection*{Procedure for Simulation Study to Compute Rate of Discovery of Signal Events}
 \begin{enumerate}
-\label{sim_study_procedure}
     \item Throw a toy, generating a sample of size $N$, $\vec{x}$ from the true distribution.
     \item Use (binned) maximum likelihood estimation to fit the parameters under the $H_0$ model, fixing $f=0$, and obtaining likelihood $L_0(\vec{x})$.
     \item Use ML estimation to fit the parameters under $H_1$ with all parameters floating, to obtain $L_1(\vec{x})$.
     \item Compute the log-likelihood ratio statistic, $T = 2\ln(L_1(\vec{x})/L_0(\vec{x}))$.
     \item Repeat steps 1-4 for a toy generated from the background only distribution.
-    \item Repeat steps 1-5 for a high number of toys, $N_{toys}$, to produce distributions of the log-likelihood ratio under $H_0$ and $H_1$.
+    \item Repeat steps 1-5 for a high number of toys, $N_{toys}$, to produce samples of the log-likelihood ratio under $H_0$ and $H_1$.
     \item Use this to compute the discovery rate at a significance level of $2.9\times10^{-7}$.
 \end{enumerate}
 Steps 2-4 detail the standard statistical procedure that could be used to infer the presence of signal in the given sample, in the realistic setting of an experiment.
@@ -295,7 +295,7 @@ Moreover, since running the simulation we are assuming that the null hypothesis 
 The discovery rate (in this case the power) is then a function of the sample size $N$ used.
 As $N$ increases, the two distributions of $T$ become narrower since the parameter estimate variances decrease.
 In turn, the discovery rate at the 5 standard deviation significance level increases since a greater proportion of the true distribution of $T$ lies above the $T_0$.
-Hence we run the procedure in \ref{sim_study_procedure} for a range of $N$ until we find the correct value to achieve a 90\% discovery rate.
+Hence we run the procedure for a range of $N$ values until we find the correct value to achieve a 90\% discovery rate.
 
 One of the serious challenges of this simulation study is that $T_0$ is supposed to lie at an extremely high quantile of the distribution of $T$ under the null hypothesis.
 Therefore, in order to precisely locate $T_0$, we would ideally produce a sample of $T$ with size $\sim10^8$ in order to ensure that the empirical distribution was based on a sample actually containing some points above the 5 standard deviation quantile.
@@ -373,24 +373,164 @@ In addition, with the exception of apparent overcoverage in the case of very low
 \begin{table}
     \centering
     \begin{tabular}{| c | c | c | c | c | c |}
+        \hline
           N & C. H1   & C. H0    & Valid   & T0       & Power    \\
+        \hline
         700 & 0.654   & 0.685    & 0.985   & 31.669   & 0.893198 \\
+        \hline
         705 & 0.655   & 0.687    & 0.986   & 31.779   & 0.897272 \\
+        \hline
         710 & 0.660   & 0.683    & 0.985   & 31.578   & 0.904182 \\
+        \hline
         715 & 0.659   & 0.684    & 0.987   & 31.617   & 0.906548 \\
+        \hline
         720 & 0.655   & 0.680    & 0.985   & 31.788   & 0.909063 \\
+        \hline
         725 & 0.658   & 0.682    & 0.986   & 31.799   & 0.912854 \\
+        \hline
         730 & 0.661   & 0.682    & 0.986   & 31.679   & 0.916819 \\
+        \hline
         735 & 0.660   & 0.684    & 0.986   & 31.888   & 0.916607 \\
+        \hline
         740 & 0.661   & 0.684    & 0.988   & 31.746   & 0.921785 \\
+        \hline
         745 & 0.660   & 0.684    & 0.986   & 32.016   & 0.922203 \\
+        \hline
         750 & 0.663   & 0.685    & 0.984   & 31.744   & 0.927548 \\
+        \hline
     \end{tabular}
 \caption{Second simulation study for part (f) using 10000 toys in each case.}
 \label{tab_f_2}
 \end{table}
 
-In Table \ref{tab_f_2} we see that the critical value to achieve 90\% power is somewhere in the range $N=705$ and $N=710$; interpolating linearly we estimate that 707 data points are required for a 90(.0036)\% discovery rate.
+In Table \ref{tab_f_2} we see that the critical value to achieve 90\% power is somewhere in the range $N=705$ and $N=710$; interpolating linearly we estimate that 707 data points are required for a 90(.0036)\% discovery rate, according to our simulation using 10000 toys.
+
+The $\chi^2$ distribution fitted to $T$ under $H_0$ was found to have around 2.5 degrees of freedom across all of the fits that used 10000 toys.
+Figure \ref{part_f_plot} shows the two generated distributions for $T$, as well as this $\chi^2$ fit to the $H_0$ distribution.
+The $\chi^2$ density shown does not fit the distribution perfectly, as it seems to underestimate the counts of the bins for the empirical distribution.
+However, even with 10000 toys generated, it should be noted that the expected number of $T$ values above the 5 standard deviation quantile of the true distribution, whatever it may be, is much less than 1 (around 0.03).
+Therefore, the $\chi^2$ fit still represents an improvement on simply using the empirical quantiles since this would massively underestimate both the critical value of $T_0$, and hence the sample size needed.
+
+\begin{figure}[hbt]
+  \includegraphics[scale=0.8]{T_distributions_f_750_10000.png}
+  \caption{Simulations of the test statistic for part (f) [generated in Python using Matplotlib].}
+  \label{part_f_plot}
+\end{figure}
+
+\subsection*{Part (g)}
+
+The first step in investigating the two versus one signal context was to implement a function to evaluate the cdf of the two-signal model, as well as the inverse cdf sampling from this model.
+
+\begin{table}
+  \centering
+  \begin{tabular}{| c | c | c | c | c | c |}
+      \hline
+         N & C. H1 & C. H0 & Valid & T0     & Power    \\
+      \hline
+      2000 & 0.669 & 0.670 & 0.992 & 26.672 & 0.650202 \\
+      \hline
+      2050 & 0.673 & 0.676 & 0.992 & 27.078 & 0.664315 \\
+      \hline
+      2100 & 0.672 & 0.682 & 0.993 & 26.745 & 0.709970 \\
+      \hline
+      2150 & 0.680 & 0.678 & 0.993 & 26.495 & 0.746224 \\
+      \hline
+      2200 & 0.678 & 0.678 & 0.994 & 26.384 & 0.768612 \\
+      \hline
+      2250 & 0.679 & 0.680 & 0.995 & 26.359 & 0.798995 \\
+      \hline
+      2300 & 0.678 & 0.679 & 0.995 & 26.487 & 0.807035 \\
+      \hline
+      2350 & 0.682 & 0.680 & 0.995 & 26.402 & 0.838191 \\
+      \hline
+      2400 & 0.682 & 0.678 & 0.992 & 26.990 & 0.833669 \\
+      \hline
+      2450 & 0.675 & 0.679 & 0.989 & 26.816 & 0.862487 \\
+      \hline
+      2500 & 0.676 & 0.680 & 0.991 & 26.527 & 0.887992 \\
+      \hline
+      2550 & 0.675 & 0.678 & 0.988 & 26.651 & 0.899798 \\
+      \hline
+      2600 & 0.679 & 0.679 & 0.997 & 26.552 & 0.912738 \\
+      \hline
+      2650 & 0.679 & 0.679 & 0.992 & 26.689 & 0.923387 \\
+      \hline
+      2700 & 0.678 & 0.679 & 0.991 & 26.414 & 0.935419 \\
+      \hline
+      2750 & 0.673 & 0.681 & 0.990 & 26.310 & 0.941414 \\
+      \hline
+      2800 & 0.677 & 0.683 & 0.993 & 26.439 & 0.945619 \\
+      \hline
+      2850 & 0.677 & 0.686 & 0.996 & 26.038 & 0.950803 \\
+      \hline
+      2900 & 0.676 & 0.683 & 0.995 & 26.506 & 0.952764 \\
+      \hline
+      2950 & 0.676 & 0.683 & 0.994 & 26.396 & 0.960765 \\
+      \hline
+      3000 & 0.671 & 0.682 & 0.991 & 26.314 & 0.963673 \\
+      \hline
+  \end{tabular}
+\caption{First simulation study for part (g) using 1000 toys in each case.}
+\label{tab_g_1}
+\end{table}
+
+In turn, the same procedure used to investigate the discovery rate for part (f) was used for this context as well.
+The difference was that now the model being fit was,
+
+\[
+    p(M) = f_1s_1(M;\mu_1,\sigma) + f_2s_2(M;\mu_2,\sigma) + (1-f_1-f_2)b(M;\lambda).
+\]
+
+and the two hypotheses were changed such that in $H_1$, all parameters simply belonged to their physical parameter space:
+
+\[
+    (f_1,f_2)\in\{(a,b):a\geq0,b\geq0,a+b\leq1\};
+\]
+\[
+  \mu_1,\mu_2\in[5.0,5.6];
+\]
+\[
+  \lambda, \sigma > 0.
+\]
+while $H_0$ was the subset of $H_1$ with the restriction $f_2=0$, so that there is just one signal.
+
+\begin{table}[htp]
+  \centering
+  \begin{tabular}{| c | c | c | c | c | c |}
+      \hline
+         N & C. H1 & C. H0 & Valid & T0     & Power    \\
+      \hline
+      2550 & 0.678 & 0.676 & 0.993 & 26.233 & 0.890126 \\
+      \hline
+      2570 & 0.679 & 0.677 & 0.993 & 26.223 & 0.895762 \\
+      \hline
+      2590 & 0.679 & 0.678 & 0.992 & 26.193 & 0.900851 \\
+      \hline
+      2610 & 0.679 & 0.679 & 0.994 & 26.141 & 0.904987 \\
+      \hline
+      2630 & 0.680 & 0.678 & 0.992 & 26.121 & 0.909893 \\
+      \hline
+      2650 & 0.679 & 0.677 & 0.993 & 26.143 & 0.913779 \\
+      \hline
+  \end{tabular}
+\caption{Second simulation study for part (g) using 20000 toys in each case.}
+\label{tab_g_2}
+\end{table}
+
+\begin{figure}[hbt]
+  \includegraphics[scale=0.8]{T_distributions_g_2650_20000.png}
+  \caption{Simulations of the test statistic for part (g) [generated in Python using Matplotlib].}
+  \label{part_g_plot}
+\end{figure}
+
+As before, a preliminary search of the values of $N$ was performed, with results in Table \ref{tab_g_1}.
+This was followed by a further search of the range $N=2550$ to $N=2650$, with results in Table \ref{tab_g_2}.
+
+The fitted degrees of freedom parameter for the test statistic under the null hypothesis was very stable, found to be 1.0 to 1 decimal place in every case.
+We can see again (Figure \ref{part_g_plot}) that although the $\chi^2$ fit for the null hypothesis distribution does not match the bins perfectly, it clearly increases the empirical `$5\sigma$' quantile of the simulation by a reasonable amount to ensure we do not underestimate the necessary sample size.
+The second simulation study in this case could not achieve the same precision as that of part (f); using a finer step size for $N$ or only 10000 toys as before led to a series of discovery rates that did not monotonically increase with $N$.
+This is likely an artefact of the less stable maximum likelihood fitting procedure in this case, given that more parameters needed to be estimated than in part (f).
+Nonetheless, we can linearly interpolate within the interval 2570 to 2590 and find that the estimated critical value for $N=2587$; this is approximately the minimum sample size necessary for a 90\% discovery rate.
 
 \bibliography{Biblio}
 
