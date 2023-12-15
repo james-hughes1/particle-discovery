@@ -37,6 +37,6 @@ The following gives approximate execution times using this system:
  - `python src/solve_part_c.py` 5 secs
  - `python src/solve_part_d.py` 5 secs
  - `python src/solve_part_e.py` 30 secs
- - `python src/solve_part_f.py` 40 mins
+ - `python src/solve_part_f.py` 45 mins
  - `python src/solve_part_g.py` 2 hrs
  - `docker build -t s1_jh2284 .` 5 mins
