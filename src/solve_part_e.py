@@ -8,10 +8,10 @@ from scipy.special import erf
 from scipy.stats import chi2
 
 from mixed_pdf_tools import (
-    sample_sb_fast,
     pdf_norm_expon_mixed,
     cdf_norm_expon_mixed,
 )
+from simulation_tools import sample_sb_fast
 
 # Sample data from true distribution and separate into bins.
 sample_array = sample_sb_fast(100000, seed=1)
@@ -46,6 +46,7 @@ def plot_sample_fit(
     xe,
     npoints=1001,
 ):
+    # Create a 2x2 grid.
     plt.figure(figsize=(12, 10))
     grid = gs.GridSpec(
         2, 2, height_ratios=[3, 1], hspace=0, width_ratios=[6, 1], wspace=0
@@ -56,10 +57,14 @@ def plot_sample_fit(
     ax4 = plt.subplot(grid[0, 1])
     ax4.set_visible(False)
     plt.axis("off")
+
+    # Plot the error bars of the sample bins.
     x_plot = np.linspace(alpha, beta, npoints)
     cx = 0.5 * (xe[1:] + xe[:-1])
     errors = nh**0.5
     ax1.errorbar(cx, nh, errors, c="k", marker="o", linestyle="")
+
+    # Plot the fitted densities.
     scale_factor = np.sum(nh) * (xe[1] - xe[0])
     pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
     pdf_b = expon.pdf(x_plot, loc=0, scale=1 / la)
@@ -86,11 +91,15 @@ def plot_sample_fit(
         title="Plot Showing Sample with Fitted Densities and" " Pull Plot",
     )
     ax1.legend()
+
+    # Plot the pulls.
     residuals = nh - (scale_factor * pdf_norm_expon_mixed(cx, *mi.values))
     pulls = residuals / errors
     ax2.errorbar(cx, pulls, 1, c="k", marker="o", linestyle="")
     ax2.hlines(0, 5.0, 5.6, colors="green")
     ax2.set(xlabel="M", ylabel="Pull")
+
+    # Plot the distribution of pulls with a N(0, 1) benchmark.
     pull_range = (np.min(pulls) - 1, np.max(pulls) + 1)
     ax3.hist(
         pulls,
@@ -108,6 +117,8 @@ def plot_sample_fit(
         alpha=0.5,
     )
     ax3.set_yticks([])
+
+    # Superimpose the chi2 and p values.
     chi2_score = np.sum(pulls**2)
     dof = len(xe) - 5
     pval = 1 - chi2.cdf(chi2_score, dof)

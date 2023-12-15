@@ -15,6 +15,7 @@ def plot_signal_background_mixed(
     filename,
     npoints=1001,
 ):
+    # Compute the components of the density.
     fig, ax = plt.subplots(figsize=(10, 8))
     x_plot = np.linspace(alpha, beta, npoints)
     pdf_s = norm.pdf(x_plot, loc=mu, scale=sg)
@@ -25,6 +26,7 @@ def plot_signal_background_mixed(
         - erf((alpha - mu) / sg * np.sqrt(2))
     )
     weight_b = (1 - f) / (np.exp(-la * alpha) - np.exp(-la * beta))
+    # Plot the density components and total.
     ax.plot(x_plot, weight_s * pdf_s, label="Signal density component")
     ax.plot(x_plot, weight_b * pdf_b, label="Background density component")
     ax.plot(x_plot, pdf_sb, label="Total density")

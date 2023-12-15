@@ -1,4 +1,4 @@
-from mixed_pdf_tools import find_sample_size
+from simulation_tools import find_sample_size
 
 # Run simulation studies with increasing granularity on the sample sizes used.
 find_sample_size(N_toys=1000, N_min=50, N_max=1050, N_step=50, model="f")
