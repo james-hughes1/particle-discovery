@@ -534,4 +534,54 @@ Nonetheless, we can linearly interpolate within the interval 2570 to 2590 and fi
 
 \bibliography{Biblio}
 
+\appendix
+\section*{README File Contents}
+
+\subsection*{Principles of Data Science Coursework Repository}
+
+\subsubsection*{Description}
+This repository contains code that is used to statistically investigate an experiment in which we are interested in discovering signal events from a sample of events with associated random variable $M$.
+
+The functionality enables users to sample from a mixed distribution where the background events are modelled as having an exponential distribution in $M$, whereas the value of $M$ for the signal events is a narrow spike around some critical value, modelled as a Gaussian distribution. Further functions enable users to estimate the sample size required to achieve a discovery rate of 90% at some specified signficance level.
+
+\subsubsection*{How to use the project}
+The project is designed to be usable via Docker. In order to run the project in this way, it is best to clone the repository to your local device using git, build the docker
+image using the terminal command
+
+\texttt{docker build -t s1\_jh2284 .}
+
+and then running the container by executing the command
+
+\texttt{docker run --rm -ti s1\_jh2284}
+
+where the options specify that the container is removed after exiting, and ensure that the container can be interacted with easily in the terminal.
+Alternatively, you can run (in the root directory)
+
+\texttt{conda env create -f environment.yml}
+
+\texttt{conda activate mphildis\_assessment\_jh2284}
+
+to build the correct conda environment and run the code in the location you cloned it to.
+Next, to run the actual code you simply execute the command
+
+\texttt{python src/solve\_part\_[c-g].py}
+
+\subsubsection*{Computer specification details}
+
+The repository was developed on a system with specifications
+\begin{itemize}
+  \item Processor: Intel(R) Core(TM) i5-1035G1 CPU @ 1.00GHz, 1190 Mhz, 4 Core(s), 8 Logical Processor(s)
+  \item Installed Physical Memory (RAM): 8.00 GB
+\end{itemize}
+
+The following gives approximate execution times using this system:
+\begin{itemize}
+  \item \texttt{python src/solve\_part\_c.py} 5 secs
+  \item \texttt{python src/solve\_part\_d.py} 5 secs
+  \item \texttt{python src/solve\_part\_e.py} 30 secs
+  \item \texttt{python src/solve\_part\_f.py} 40 mins
+  \item \texttt{python src/solve\_part\_g.py} 2 hrs
+  \item \texttt{docker build -t s1\_jh2284 .} 5 mins
+\end{itemize}
+
 \end{document}
