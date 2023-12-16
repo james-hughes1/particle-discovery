@@ -184,7 +184,7 @@ Originally, rejection sampling was used to sample from the signal plus backgroun
 Instead, an inverse CDF method was implemented.
 The inverse CDF method involves generating a sample of points uniformly distributed in $[0, 1]$, and then transforming these by the percentage point function of the desired distribution.
 
-Let $X$ have distribution $U(0,1)$, and denote the transformed random variable $Y:=F^{-1}(X)$ where $F$ is the cdf of the distribution we wish to sample from.
+Let $X$ have distribution $U(0,1)$, and denote the transformed random variable $Y:=F^{-1}(X)$ where $F$ is the CDF of the distribution we wish to sample from.
 Then clearly $Y$ has the desired distribution because for any $c\in(-\infty,+\infty)$,
 
 \begin{align*}
@@ -193,7 +193,7 @@ Then clearly $Y$ has the desired distribution because for any $c\in(-\infty,+\in
                         & = F(c) & \text{$X$ is uniformly distributed}\\
 \end{align*}
 
-Hence $Y$ has cdf $F$, proving that the transformed data points should have the desired distribution.
+Hence $Y$ has CDF $F$, proving that the transformed data points should have the desired distribution.
 
 \begin{table}[htp]
   \centering
@@ -243,7 +243,7 @@ cdf_mixed_approx_sb = cdf_norm_expon_mixed(
 quantiles_sb = np.linspace(0.0, 1.0, int(10**GRANULAR))
 cdf_mixed_inv_sb_01 = np.zeros(int(10**GRANULAR))
 # For each quantile in [0.0, 1.0], find how far into the range [5.0, 5.6] you
-# need to go in order for the cdf to equal the quantile.
+# need to go in order for the CDF to equal the quantile.
 for quantile_idx, quantile in enumerate(quantiles_sb):
     cdf_mixed_inv_sb_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
         cdf_mixed_approx_sb < quantiles_sb[quantile_idx]
@@ -264,34 +264,35 @@ The \texttt{iminuit} package produces this estimate of the covariances by estima
 The errors in \ref{tab1} are then the square roots of the variances (diagonal entries), that is, estimates of the uncertainties of the estimates.
 These estimates rely on the assumption of a large sample size (which is true in this case) and that the second derivatives of the log-likelihood are relatively constant near the true maximum-likelihood estimate.
 
+\begin{figure}[htb]
+  \includegraphics[scale=0.45]{part_e_plot.png}
+  \caption{Plot showing sample bins and fitted density [generated in Python using Matplotlib].}
+  \label{part_e_plot}
+\end{figure}
+
 The sample is plotted along with its fitted density according to the parameter estimates in Figure \ref{part_e_plot}.
 Since the sample is binned, each of the bin counts is treated as a Poisson random variable and hence the errors plotted are the square roots of the bin counts.
 Below the main plot, we have a plot of the `pull' values; the residual errors of the bin counts versus the fitted model, divided by the bin errors.
 The histogram to the right confirms that these values appear to follow a standard Gaussian distribution (the green line) which is to be expected because the density that has been fitted has the correct functional form.
 Moreover, the $\chi^2$ value, the sum of the squares of the pulls, is approximately equal to the number of degrees of freedom, 95, indicating that we have produced a high quality fit, whilst avoiding overfitting to the noise of the sample.
 
-\begin{figure}[hbt]
-    \includegraphics[scale=0.45]{part_e_plot.png}
-    \caption{The true underlying distribution of $M$ [generated in Python using Matplotlib].}
-    \label{part_e_plot}
-\end{figure}
-
 \section*{Section B}
 \subsection*{Part (f)}
 
-For this section, the statistical situation involves the null hypothesis $H_0$ that there is no signal present in the data, that is, $f=0$ and the alternative hypothesis $H_1$, that there is at least one signal event, $f\in(0,1]$.
+For this section, the statistical analysis examines the null hypothesis $H_0$ that there is no signal present in the data, that is, $f=0$, and the alternative hypothesis $H_1$, that there is at least one signal event, $f\in(0,1]$.
 The procedure is outlined in the next section.
 \subsubsection*{Procedure for Simulation Study to Compute Rate of Discovery of Signal Events}
 \begin{enumerate}
-    \item Throw a toy, generating a sample of size $N$, $\vec{x}$ from the true distribution.
-    \item Use (binned) maximum likelihood estimation to fit the parameters under the $H_0$ model, fixing $f=0$, and obtaining likelihood $L_0(\vec{x})$.
-    \item Use ML estimation to fit the parameters under $H_1$ with all parameters floating, to obtain $L_1(\vec{x})$.
-    \item Compute the log-likelihood ratio statistic, $T = 2\ln(L_1(\vec{x})/L_0(\vec{x}))$.
+    \item Throw a toy, generating a sample $\vec{x}$ of size $N$ from the true distribution.
+    \item Use (binned) maximum likelihood estimation to fit the parameters under the $H_0$ model, fixing $f=0$, and obtaining likelihood $L(\vec{x}|H_0)$.
+    \item Use ML estimation to fit the parameters under $H_1$ with all parameters floating, to obtain $L(\vec{x}|H_1)$.
+    \item Compute the log-likelihood ratio statistic, $T = 2\ln(L(\vec{x}|H_1)/L(\vec{x}|H_0))$.
     \item Repeat steps 1-4 for a toy generated from the background only distribution.
     \item Repeat steps 1-5 for a high number of toys, $N_{toys}$, to produce samples of the log-likelihood ratio under $H_0$ and $H_1$.
     \item Use this to compute the discovery rate at a significance level of $2.9\times10^{-7}$.
 \end{enumerate}
 Steps 2-4 detail the standard statistical procedure that could be used to infer the presence of signal in the given sample, in the realistic setting of an experiment.
+
 However, this relies on having some critical value for the test statistic which we do not have for the statistical model.
 Hence steps 5-7 are used to simulate a large number of `toys', datasets independently sampled from the true distribution to estimate the distribution of $T$ under $H_1$, and similarly for the distribution under $H_0$.
 The two distributions then enable us to set a critical value $T=T_0$ for discovery according to the specified significance, and to find the resulting statistical power of the test.
@@ -306,13 +307,14 @@ In particular, we have
 \end{equation}
 Equation \eqref{eq_significance} fixes the value of $T_0$, above which the test statistic provides evidence for a scientific discovery of at least one signal event, in which case we reject the null hypothesis in favour of the alternate hypothesis.
 Equation \eqref{eq_power} tells us the statistical power of this test.
-In particular, with the desired power, 90\%, the probability of falsely rejecting the alternative hypothesis when it is true is 10\%.
-Moreover, since running the simulation we are assuming that the null hypothesis is true, this means that according to our estimated distribution of $T$ under the true distribution, the probability of discovery (of signal) is 90\%, because the $T$ value is above the critical region 90\% of the time.
+With the desired power, 90\%, the probability of falsely rejecting the alternative hypothesis when it is true is 10\%.
+In our context, we are indeed assuming that the true population distribution satisfies the alternative hypothesis, and so the power is equivalent to the rate of discovery of the true signal from the sample.
+In other words, under repeated samples of the given size, we would expect to claim a discovery (with $T>T_0$) in 90\% of such samples.
 
-The discovery rate (in this case the power) is then a function of the sample size $N$ used.
-As $N$ increases, the two distributions of $T$ become narrower since the parameter estimate variances decrease.
+Therefore the discovery rate is a function of the sample size $N$ used.
+As $N$ increases, the two distributions of $T$ become more distinct, as the estimates of the parameters have decreased uncertainty.
 In turn, the discovery rate at the 5 standard deviation significance level increases since a greater proportion of the true distribution of $T$ lies above the $T_0$.
-Hence we run the procedure for a range of $N$ values until we find the correct value to achieve a 90\% discovery rate.
+Hence we run the procedure above for a range of $N$ values until we find the correct value to achieve a 90\% discovery rate.
 
 One of the serious challenges of this simulation study is that $T_0$ is supposed to lie at an extremely high quantile of the distribution of $T$ under the null hypothesis.
 Therefore, in order to precisely locate $T_0$, we would ideally produce a sample of $T$ with size $\sim10^8$ in order to ensure that the empirical distribution was based on a sample actually containing some points above the 5 standard deviation quantile.
@@ -328,7 +330,6 @@ Therefore we overcome the small number of toys used by fitting a $\chi^2$ model 
 In order to find the appropriate trade-off between processing time and accuracy, a preliminary scan of different values of $N$ was performed over a large range of $N$ values, and using a small number of toys, 1000.
 This gave an indication of the approximate critical value of $N$.
 Then a second simulation study was performed with a much narrower range of sample size values, but using 10000 toys in each case.
-
 These results are recorded in Tables \ref{tab_f_1} and \ref{tab_f_2}.
 
 \begin{table}
@@ -382,10 +383,12 @@ These results are recorded in Tables \ref{tab_f_1} and \ref{tab_f_2}.
 \label{tab_f_1}
 \end{table}
 
-In all cases, any time the \texttt{iminuit} package was used to fit the parameter estimates, the estimated errors of these fits, as well as whether or not the software reported that a valid minimum was reached, was recorded.
-In the simple cases of fitting the background only model to data sampled from the background only data, and similarly for the mixed model, the coverage of the fitted parameters with respect to the true values was computed, in order to check that all the fits used for the study were of high quality.
-If either of the two fits associated to a generated $T$ value were invalid, then that T value was discarded and not used in the study. In all the results the proportion of valid T values (recorded in the `Valid' column) was sufficiently high that the number of toys used was close to the specified amount.
-In addition, with the exception of apparent overcoverage in the case of very low sample sizes $N$ in Table \ref{tab_f_1}, we can see that the coverage for the estimates checked when fitting $H_0$ and $H_1$ were close to the expected 68.3\%.
+In all cases, the \texttt{iminuit} package was used to fit the parameter estimates, and give the estimated errors of these fits.
+In the simple cases of fitting the background only model to data sampled from the background only data, and similarly for the mixed model, the coverage of the fitted parameters with respect to the true values was computed, in order to check that the fits used for the study were of high quality.
+The \texttt{iminuit} package also reports whether or not a valid minimum was reached.
+If either of the two fits associated to a generated $T$ value were invalid, then that T value was discarded and not used in the study.
+In all the results the proportion of valid T values (recorded in the `Valid' column) was sufficiently high that the number of toys used was close to the specified amount.
+In addition, with the exception of apparent overcoverage in the case of very low sample sizes $N$ in Table \ref{tab_f_1}, we can see that the coverages for the estimates checked when fitting $H_0$ and $H_1$ were close to the expected 68.3\%.
 
 \begin{table}
     \centering
@@ -420,23 +423,23 @@ In addition, with the exception of apparent overcoverage in the case of very low
 \label{tab_f_2}
 \end{table}
 
-In Table \ref{tab_f_2} we see that the critical value to achieve 90\% power is somewhere in the range $N=705$ and $N=710$; interpolating linearly we estimate that 707 data points are required for a 90(.0036)\% discovery rate, according to our simulation using 10000 toys.
-
-The $\chi^2$ distribution fitted to $T$ under $H_0$ was found to have around 2.5 degrees of freedom across all of the fits that used 10000 toys.
-Figure \ref{part_f_plot} shows the two generated distributions for $T$, as well as this $\chi^2$ fit to the $H_0$ distribution.
-The $\chi^2$ density shown does not fit the distribution perfectly, as it seems to underestimate the counts of the bins for the empirical distribution.
-However, even with 10000 toys generated, it should be noted that the expected number of $T$ values above the 5 standard deviation quantile of the true distribution, whatever it may be, is much less than 1 (around 0.03).
-Therefore, the $\chi^2$ fit still represents an improvement on simply using the empirical quantiles since this would massively underestimate both the critical value of $T_0$, and hence the sample size needed.
-
-\begin{figure}[hbt]
+\begin{figure}[htbp]
   \includegraphics[scale=0.8]{T_distributions_f_750_10000.png}
   \caption{Simulations of the test statistic for part (f) [generated in Python using Matplotlib].}
   \label{part_f_plot}
 \end{figure}
 
+In Table \ref{tab_f_2} we see that the critical value to achieve 90\% power is somewhere in the range $N=705$ and $N=710$; interpolating linearly we estimate that 707 data points are required for a 90(.0036)\% discovery rate, according to our simulation using 10000 toys.
+
+The $\chi^2$ distribution fitted to $T$ under $H_0$ was found to have an average of 2.5 degrees of freedom across all of the fits that used 10000 toys.
+Figure \ref{part_f_plot} shows the two generated distributions for $T$, as well as this $\chi^2$ fit to the $H_0$ distribution.
+The $\chi^2$ density shown does not fit the distribution perfectly, as it seems to underestimate the counts of the bins for the empirical distribution.
+However, even with 10000 toys generated, it should be noted that the expected number of $T$ values above the 5 standard deviation quantile of the true distribution, is much less than 1 (around 0.03).
+Therefore, the $\chi^2$ fit still represents an improvement on simply using the empirical quantiles since this would massively underestimate both the critical value of $T_0$, and hence the sample size needed.
+
 \subsection*{Part (g)}
 
-The first step in investigating the two versus one signal context was to implement a function to evaluate the cdf of the two-signal model, as well as the inverse cdf sampling from this model.
+The first step in investigating the two versus one signal context was to implement a function to evaluate the CDF of the two-signal model, as well as the inverse CDF sampling from this model.
 
 \begin{table}
   \centering
@@ -534,7 +537,7 @@ while $H_0$ was the subset of $H_1$ with the restriction $f_2=0$, so that there 
 \label{tab_g_2}
 \end{table}
 
-\begin{figure}[hbt]
+\begin{figure}[htbp]
   \includegraphics[scale=0.8]{T_distributions_g_2650_20000.png}
   \caption{Simulations of the test statistic for part (g) [generated in Python using Matplotlib].}
   \label{part_g_plot}
@@ -547,7 +550,9 @@ The fitted degrees of freedom parameter for the test statistic under the null hy
 We can see again (Figure \ref{part_g_plot}) that although the $\chi^2$ fit for the null hypothesis distribution does not match the bins perfectly, it clearly increases the empirical `$5\sigma$' quantile of the simulation by a reasonable amount to ensure we do not underestimate the necessary sample size.
 The second simulation study in this case could not achieve the same precision as that of part (f); using a finer step size for $N$ or only 10000 toys as before led to a series of discovery rates that did not monotonically increase with $N$.
 This is likely an artefact of the less stable maximum likelihood fitting procedure in this case, given that more parameters needed to be estimated than in part (f).
-Nonetheless, we can linearly interpolate within the interval 2570 to 2590 and find that the estimated critical value for $N=2587$; this is approximately the minimum sample size necessary for a 90\% discovery rate.
+Nonetheless, we can linearly interpolate within the interval 2570 to 2590 and find that the estimated critical value was $N=2587$; this is approximately the minimum sample size necessary for a 90\% discovery rate.
+
+
 
 \bibliography{Biblio}
 
@@ -582,6 +587,10 @@ to build the correct conda environment and run the code in the location you clon
 Next, to run the actual code you simply execute the command
 
 \texttt{python src/solve\_part\_[c-g].py}
+
+The codebase is highly modular in order to make the individual scripts more readable, and to have less duplicated code.
+The scripts for parts c and d use routines created in \texttt{mixed\_pdf\_tools}, while the scripts for the rest of the questions use more advanced routines in \texttt{simulation\_tools}.
+In particular, this module initialises the global variables used for the inverse CDF sampling whenever they are imported, so you may notice a brief delay of around 30 seconds when running the scripts for parts e-g.
 
 \subsubsection*{Computer specification details}
 
