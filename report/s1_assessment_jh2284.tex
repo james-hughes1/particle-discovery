@@ -39,15 +39,18 @@
 
 \subsection*{Part (a)}
 
-We begin by showing that both densities $s$ and $b$ are properly normalised in the range $M\in [-\infty, +\infty]$. In the former case, as a first step we use a change of variables $Z = \mu + \sigma M$ such that $\frac{dM}{dZ} = \sigma$, for which the integral limits don't change:
+We begin by showing that both densities $s$ and $b$ are properly normalised in the range $M\in [-\infty, +\infty]$, by showing that integrating either function over this range yields a value of 1.
+In the former case, as a first step we use a change of variables $M = \mu + \sigma Z$ such that $\frac{\mathrm{d}M}{\mathrm{d}Z} = \sigma$, for which the integral limits don't change:
 
 \begin{align*}
-    \int_{-\infty}^\infty s(M;\mu, \sigma) & = \int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}\sigma}\exp \left[-\frac{(M-\mu)^2}{2\sigma^2}\right]dM\\
-        & = \int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{1}{2}Z^2)\cdot \sigma dZ\\
-        & = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty\exp(-\frac{1}{2}Z^2)dZ\\
+    \int_{-\infty}^\infty s(M;\mu, \sigma) & = \int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}\sigma}\exp \left[-\frac{(M-\mu)^2}{2\sigma^2}\right]\mathrm{d}M\\
+        & = \int_{-\infty}^\infty \frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{1}{2}Z^2)\cdot \sigma \mathrm{d}Z\\
+        & = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty\exp(-\frac{1}{2}Z^2)\mathrm{d}Z\\
+        & =: I\\
 \end{align*}
 
-In order to prove that $s$ is properly normalised, we simply need to show that the last expression above evaluates to $1$. We do this by computing it's square, which in turn leads to an integral in two dummy variables. Below we then use the transformation to polar coordinates $(X,Y) = \rho(R,\phi) = (R\cos(\phi), R\sin(\phi))$ which has Jacobian matrix
+We will proceed by showing that $I^2=1$, and since the integrand of $I$ above is real and positive on $[-\infty,+\infty]$, this proves that $I=1$.
+This requires the transformation to polar coordinates $(X,Y) = \rho(R,\phi) = (R\cos(\phi), R\sin(\phi))$ which has Jacobian matrix
 
 \[
     \begin{pmatrix}
@@ -56,26 +59,26 @@ In order to prove that $s$ is properly normalised, we simply need to show that t
     \end{pmatrix}
 \]
 
-and hence $|J_\rho(R,\phi)| = R$. Then, denoting the integral in the final expression above by $I$, we find:
+and hence $|J_\rho(R,\phi)| = R$. Then,
 
 \begin{align*}
-    \left[\frac{1}{\sqrt{2\pi}}I\right]^2 & = \frac{1}{2\pi}\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}X^2)dX\right]\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}Y^2)dY\right] \\
-        & = \frac{1}{2\pi}\int_{-\infty}^\infty\int_{-\infty}^\infty\exp(-\frac{1}{2}(X^2 + Y^2))dXdY\\
-        & = \frac{1}{2\pi}\int_{0}^{2\pi}\int_{0}^\infty\exp(-\frac{1}{2}(R^2))\cdot R dRd\phi\\
+    I^2 & = \frac{1}{2\pi}\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}X^2)\mathrm{d}X\right]\left[\int_{-\infty}^\infty\exp(-\frac{1}{2}Y^2)\mathrm{d}Y\right] \\
+        & = \frac{1}{2\pi}\int_{-\infty}^\infty\int_{-\infty}^\infty\exp(-\frac{1}{2}(X^2 + Y^2))\mathrm{d}X\mathrm{d}Y\\
+        & = \frac{1}{2\pi}\int_{0}^{2\pi}\int_{0}^\infty\exp(-\frac{1}{2}(R^2))\cdot R \mathrm{d}R\mathrm{d}\phi\\
         & = \left[-\exp(-\frac{1}{2}R^2)\right]_{R=0}^{R=\infty} \\
         & = 1. \\
 \end{align*}
 
 For the background, we note that the density (integrand) $b$ is zero for all $M<0$, and show
 \begin{align*}
-    \int_{-\infty}^\infty b(M;\lambda) & = \int_0^\infty \lambda e^{-\lambda M}dM \\
+    \int_{-\infty}^\infty b(M;\lambda) & = \int_0^\infty \lambda e^{-\lambda M}\mathrm{d}M \\
     & = \left[-e^{-\lambda M}\right]_{M=0}^{M=\infty} \\
     & = 1. \\
 \end{align*}
 
 Finally this lets us show that the probability density $p$ given is properly normalised over $[-\infty,+\infty]$ because
 \begin{align*}
-    \int_{-\infty}^\infty p(M; f,\lambda,\mu,\sigma)dM & = f\int_{-\infty}^\infty s(M;\mu, \sigma)dM + (1-f)\int_{-\infty}^\infty b(M;\lambda)dM \\
+    \int_{-\infty}^\infty p(M; f,\lambda,\mu,\sigma)\mathrm{d}M & = f\int_{-\infty}^\infty s(M;\mu, \sigma)\mathrm{d}M + (1-f)\int_{-\infty}^\infty b(M;\lambda)\mathrm{d}M \\
     & = f\cdot 1 + (1-f)\cdot 1\\
     & = 1. \\
 \end{align*}
@@ -85,18 +88,18 @@ Finally this lets us show that the probability density $p$ given is properly nor
 In order to ensure that the fraction of signal in the restricted distribution for $M$ remains $f$, we must normalise the signal and background separately over $[\alpha,\beta]$, we introduce these new restricted distributions as
 
 \begin{align*}
-    s_r(M;\mu,\sigma) = \frac{s(M;\mu,\sigma)}{\int_\alpha^\beta s(M;\mu,\sigma)dM} && b_r(M;\lambda) = \frac{b(M;\lambda)}{\int_\alpha^\beta b(M;\lambda)dM}
+    s_r(M;\mu,\sigma) = \frac{s(M;\mu,\sigma)}{\int_\alpha^\beta s(M;\mu,\sigma)\mathrm{d}M} && b_r(M;\lambda) = \frac{b(M;\lambda)}{\int_\alpha^\beta b(M;\lambda)\mathrm{d}M}
 \end{align*}
 
 We then compute the relevant integrals:
 
 \begin{align*}
-    \int_\alpha^\beta s(M;\mu,\sigma)dM & = \int_{-\infty}^\beta s(M;\mu,\sigma)dM - \int_{-\infty}^\alpha s(M;\mu,\sigma)dM \\
+    \int_\alpha^\beta s(M;\mu,\sigma)\mathrm{d}M & = \int_{-\infty}^\beta s(M;\mu,\sigma)\mathrm{d}M - \int_{-\infty}^\alpha s(M;\mu,\sigma)\mathrm{d}M \\
     & = \frac{1}{2}\left[1 + \erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right)\right] - \frac{1}{2}\left[1 + \erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)\right] \\
     & = \frac{1}{2}\erf\left(\frac{\beta - \mu}{\sigma\sqrt{2}}\right) - \frac{1}{2}\erf\left(\frac{\alpha - \mu}{\sigma\sqrt{2}}\right)
 \end{align*}
 \begin{align*}
-    \int_\alpha^\beta b(M;\lambda)dM & = \int_{-\infty}^\beta b(M;\lambda)dM + \int_{-\infty}^\alpha b(M;\lambda)dM \\
+    \int_\alpha^\beta b(M;\lambda)\mathrm{d}M & = \int_{-\infty}^\beta b(M;\lambda)\mathrm{d}M + \int_{-\infty}^\alpha b(M;\lambda)\mathrm{d}M \\
     & = 1 - e^{-\lambda\beta} - (1 - e^{-\lambda\beta}) \\
     & = e^{-\lambda\alpha} - e^{-\lambda\beta}
 \end{align*}
