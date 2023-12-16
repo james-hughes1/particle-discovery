@@ -5,7 +5,7 @@ from scipy.integrate import quad
 
 
 def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
-    # Compute the value signal and background pdf values wihtout
+    # Compute the value signal and background pdf values without
     # truncating to [alpha, beta].
     pdf_s = norm.pdf(x, loc=mu, scale=sg)
     pdf_b = expon.pdf(x, loc=0, scale=1 / la)
