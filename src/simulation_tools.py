@@ -254,6 +254,7 @@ def T_simulation(N, N_toys, model, plot):
     covered_total_h1 = np.sum(covered_h1[valid_toys == 1])
     covered_total_h0 = np.sum(covered_h0[valid_toys == 1])
 
+    # Fit the H0 distribution of T with a chi2, and find the power.
     nll = UnbinnedNLL(T_h0_sample, chi2_pdf)
     mi = Minuit(nll, dof=3.0)
     mi.limits["dof"] = (0.0, 10.0)
