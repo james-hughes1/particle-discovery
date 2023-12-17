@@ -90,7 +90,7 @@ Finally this lets us show that the probability density $p$ given is properly nor
 
 \subsection*{Part (b)}
 
-In order to ensure that the fraction of signal in the restricted distribution for $M$ remains $f$, we must normalise the signal and background separately over $[\alpha,\beta]$, we introduce these new restricted distributions as
+In order to ensure that the fraction of signal in the restricted distribution for $M$ remains $f$, we must normalise the signal and background separately over $[\alpha,\beta]$. We introduce these new restricted distributions as
 
 \begin{align*}
     s_r(M;\mu,\sigma) = \frac{s(M;\mu,\sigma)}{\int_\alpha^\beta s(M;\mu,\sigma)\mathrm{d}M} && b_r(M;\lambda) = \frac{b(M;\lambda)}{\int_\alpha^\beta b(M;\lambda)\mathrm{d}M}
@@ -131,13 +131,13 @@ Note that the value for $p_r(M;\boldsymbol{\theta})$ is zero when $M\notin[\alph
 
 To implement the expressions for the probability density function, the following function was used.
 
-\begin{lstlisting}[caption=Function implementing pdf for part (c).,]
+\begin{lstlisting}[caption=Function implementing PDF for part (c).,]
     def pdf_norm_expon_mixed(x, f, la, mu, sg, alpha, beta):
-    # Compute the value signal and background pdf values without
+    # Compute the value signal and background PDF values without
     # truncating to [alpha, beta].
     pdf_s = norm.pdf(x, loc=mu, scale=sg)
     pdf_b = expon.pdf(x, loc=0, scale=1 / la)
-    # Compute the pdf value weights, including the signal fraction f
+    # Compute the PDF value weights, including the signal fraction f
     # and normalising to the interval.
     weight_s = (2 * f) / (
         erf((beta - mu) / (sg * np.sqrt(2)))
@@ -151,11 +151,11 @@ The function takes in the argument \texttt{x}, the four parameters \texttt{f, la
 The function first computes the signal and background parts of the density as specified by $s(.)$ and $b(.)$, without any domain restriction.
 This is done with the \texttt{norm.pdf} and \texttt{expon.pdf} from the \texttt{numba\_stats} package.
 Next we compute the coefficients of these terms as specified in \eqref{eqpdf} using the \texttt{scipy.special} module to evaluate the error function, using its method \texttt{erf}.
-Finally we return the weighted sum of the two pdf evaluations to give the mixed pdf value at \texttt{x}.
+Finally we return the weighted sum of the two PDF evaluations to give the mixed PDF value at \texttt{x}.
 
 We also check this function is properly normalised in the interval $[5, 5.6]$ using the following code.
 
-\begin{lstlisting}[caption=Function checking the normalisation of the pdf for part (c).]
+\begin{lstlisting}[caption=Function checking the normalisation of the PDF for part (c).]
 def check_normalisation(pdf, lower, upper):
     integral_value, abserr = quad(pdf, lower, upper)
     return integral_value
@@ -194,6 +194,24 @@ Then clearly $Y$ has the desired distribution because for any $c\in(-\infty,+\in
 \end{align*}
 
 Hence $Y$ has CDF $F$, proving that the transformed data points should have the desired distribution.
+In this case the cumulative distribution for the true density $p$ is intractable, and thus we have to estimate it at small discrete intervals using the below block of code.
+
+\begin{lstlisting}[caption=Code block producing array of values for inverse CDF of $p$ (e).]
+  # Compute CDF values across interval [5.0, 5.6].
+  cdf_mixed_approx_sb = cdf_norm_expon_mixed(
+      input_space, 0.1, 0.5, 5.28, 0.018, 5.0, 5.6
+  )
+  quantiles_sb = np.linspace(0.0, 1.0, int(10**GRANULAR))
+  cdf_mixed_inv_sb_01 = np.zeros(int(10**GRANULAR))
+  # For each quantile in [0.0, 1.0], find how far into the range [5.0, 5.6] you
+  # need to go in order for the CDF to equal the quantile.
+  for quantile_idx, quantile in enumerate(quantiles_sb):
+      cdf_mixed_inv_sb_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
+          cdf_mixed_approx_sb < quantiles_sb[quantile_idx]
+      )
+  # Transform into the interval [5.0, 5.6].
+  CDF_MIXED_INV_APPROX_SB = 5.0 + 0.6 * cdf_mixed_inv_sb_01
+  \end{lstlisting}
 
 \begin{table}[htp]
   \centering
@@ -233,35 +251,16 @@ Hence $Y$ has CDF $F$, proving that the transformed data points should have the 
 \label{tab2}
 \end{table}
 
-In this case the cumulative distribution for the true density $p$ is intractable, and thus we have to estimate it at small discrete intervals using the below block of code.
-
-\begin{lstlisting}[caption=Code block producing array of values for inverse CDF of $p$ (e).]
-# Compute CDF values across interval [5.0, 5.6].
-cdf_mixed_approx_sb = cdf_norm_expon_mixed(
-    input_space, 0.1, 0.5, 5.28, 0.018, 5.0, 5.6
-)
-quantiles_sb = np.linspace(0.0, 1.0, int(10**GRANULAR))
-cdf_mixed_inv_sb_01 = np.zeros(int(10**GRANULAR))
-# For each quantile in [0.0, 1.0], find how far into the range [5.0, 5.6] you
-# need to go in order for the CDF to equal the quantile.
-for quantile_idx, quantile in enumerate(quantiles_sb):
-    cdf_mixed_inv_sb_01[quantile_idx] = (10 ** (-GRANULAR)) * np.sum(
-        cdf_mixed_approx_sb < quantiles_sb[quantile_idx]
-    )
-# Transform into the interval [5.0, 5.6].
-CDF_MIXED_INV_APPROX_SB = 5.0 + 0.6 * cdf_mixed_inv_sb_01
-\end{lstlisting}
-
 We then model the density function of the sample parametrically using a model of the same form as the true distribution $p$.
 The four parameters are estimated by using a binned maximum likelihood procedure: first separating the data into 100 bins, and then finding maximum likelihood estimates for the parameters based on the binned data.
 This is done using the \texttt{iminuit} Python package.
 
-In Table \ref{tab1} we see the fitted values for the binned maximum likelihood fit for the large sample run in \texttt{solve\_part\_e.py}
+In Table \ref{tab1} we see the fitted values for the binned maximum likelihood fit for the large sample run in \texttt{solve\_part\_e.py}.
 We see that the parameter estimates are very close to their true values, with correspondingly low errors.
 Table \ref{tab2} gives more information about the errors, displaying the matrix of covariances between the parameter estimates.
 
-The \texttt{iminuit} package produces this estimate of the covariances by estimating the inverse of the Hessian of the negative log-likelihood function.
-The errors in \ref{tab1} are then the square roots of the variances (diagonal entries), that is, estimates of the uncertainties of the estimates.
+The \texttt{iminuit} package produces this estimate of the covariances by estimating the inverse of the Hessian of the negative log-likelihood function \cite{iminuit}.
+The errors in Table \ref{tab1} are then the square roots of the variances (diagonal entries), that is, estimates of the uncertainties of the estimates.
 These estimates rely on the assumption of a large sample size (which is true in this case) and that the second derivatives of the log-likelihood are relatively constant near the true maximum-likelihood estimate.
 
 \begin{figure}[htb]
@@ -284,8 +283,8 @@ The procedure is outlined in the next section.
 \subsubsection*{Procedure for Simulation Study to Compute Rate of Discovery of Signal Events}
 \begin{enumerate}
     \item Throw a toy, generating a sample $\vec{x}$ of size $N$ from the true distribution.
-    \item Use (binned) maximum likelihood estimation to fit the parameters under the $H_0$ model, fixing $f=0$, and obtaining likelihood $L(\vec{x}|H_0)$.
-    \item Use ML estimation to fit the parameters under $H_1$ with all parameters floating, to obtain $L(\vec{x}|H_1)$.
+    \item Use binned maximum likelihood estimation to fit the parameters under the $H_0$ model, fixing $f=0$, and obtaining likelihood $L(\vec{x}|H_0)$.
+    \item Use binned maximum likelihood estimation to fit the parameters under $H_1$ with all parameters floating, to obtain $L(\vec{x}|H_1)$.
     \item Compute the log-likelihood ratio statistic, $T = 2\ln(L(\vec{x}|H_1)/L(\vec{x}|H_0))$.
     \item Repeat steps 1-4 for a toy generated from the background only distribution.
     \item Repeat steps 1-5 for a high number of toys, $N_{toys}$, to produce samples of the log-likelihood ratio under $H_0$ and $H_1$.
@@ -321,13 +320,13 @@ Therefore, in order to precisely locate $T_0$, we would ideally produce a sample
 A lot of time was spent optimising the code in order to achieve this end, but it proved impossible with the given processing and time constraints.
 
 Therefore, the solution was to perform the study with a much smaller number of toys thrown to find $T$, around $\sim10^5$ at most, and then use this to parametrically estimate the true distribution under $H_0$.
-Theoretically, Wilk's Theorem \cite{wilks} provides an asymptotic result which ensures that asymptotically as $N$ approaches infinity, twice the negative log-likelihood ratio follows a $\chi^2$ distribution under the null hypothesis, under certain regularity conditions, such as the null hypothesis being simple, the alternate being composite, and the former being a subset of the latter.
+Theoretically, Wilks' Theorem \cite{wilks} provides an asymptotic result which ensures that as $N$ approaches infinity, twice the negative log-likelihood ratio follows a $\chi^2$ distribution under the null hypothesis, under certain regularity conditions, such as the null hypothesis being simple, the alternate being composite, and the former being a subset of the latter.
 Moreover, in this case the degrees of freedom of the $\chi^2$ distribution should be the difference in dimension of the two spaces of parameters for the hypotheses.
 In our context some of the regularity conditions have been violated, for instance our null hypothesis $f=0$ lies on the boundary of the parameter space for $H_1$.
 However, in many cases such as this one, it has been found that the null hypothesis distribution of $T$ still loosely follows some form of $\chi^2$ distribution, often just with a different degrees of freedom parameter, or a mixture of multiple $\chi^2$ distributions \cite{wilks_exc_1} \cite{wilks_exc_2}.
 Therefore we overcome the small number of toys used by fitting a $\chi^2$ model to the sample of $T$ distributed under $H_0$, and using this estimate to find the value of $T_0$ at the required significance level.
 
-In order to find the appropriate trade-off between processing time and accuracy, a preliminary scan of different values of $N$ was performed over a large range of $N$ values, and using a small number of toys, 1000.
+In order to find the appropriate trade-off between processing time and precision, a preliminary scan of different values of $N$ was performed over a large range of $N$ values, and using a small number of toys, 1000.
 This gave an indication of the approximate critical value of $N$.
 Then a second simulation study was performed with a much narrower range of sample size values, but using 10000 toys in each case.
 These results are recorded in Tables \ref{tab_f_1} and \ref{tab_f_2}.
@@ -384,7 +383,7 @@ These results are recorded in Tables \ref{tab_f_1} and \ref{tab_f_2}.
 \end{table}
 
 In all cases, the \texttt{iminuit} package was used to fit the parameter estimates, and give the estimated errors of these fits.
-In the simple cases of fitting the background only model to data sampled from the background only data, and similarly for the mixed model, the coverage of the fitted parameters with respect to the true values was computed, in order to check that the fits used for the study were of high quality.
+In the simple cases of fitting the background only model to data sampled from the background only distribution, and similarly for the mixed model, the coverage of the fitted parameters with respect to the true values was computed, in order to check that the fits used for the study were of high quality.
 The \texttt{iminuit} package also reports whether or not a valid minimum was reached.
 If either of the two fits associated to a generated $T$ value were invalid, then that T value was discarded and not used in the study.
 In all the results the proportion of valid T values (recorded in the `Valid' column) was sufficiently high that the number of toys used was close to the specified amount.
@@ -555,6 +554,8 @@ Nonetheless, we can linearly interpolate within the interval 2570 to 2590 and fi
 
 
 \bibliography{Biblio}
+
+\newpage
 
 \appendix
 \section*{README File Contents}
