@@ -589,6 +589,8 @@ Next, to run the actual code you simply execute the command
 
 \texttt{python src/solve\_part\_[c-g].py}
 
+Note that parts d-g produce text files and images that are saved in the `outputs/` folder.
+
 The codebase is highly modular in order to make the individual scripts more readable, and to have less duplicated code.
 The scripts for parts c and d use routines created in \texttt{mixed\_pdf\_tools}, while the scripts for the rest of the questions use more advanced routines in \texttt{simulation\_tools}.
 In particular, this module initialises the global variables used for the inverse CDF sampling whenever they are imported, so you may notice a brief delay of around 30 seconds when running the scripts for parts e-g.
